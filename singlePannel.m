@@ -26,29 +26,29 @@ ifi = Screen('GetFlipInterval', win);
 Screen('BlendFunction', win, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 % the coordinats of the 2 dots
 target_x_left    = winRect(3)/3;
-target_y          = winRect(4)/2;
-target_x_right = winRect(3)*2/3;
-showTime       = 10;
+target_y         = winRect(4)/2;
+target_x_right   = winRect(3)*2/3;
+showTime         = 10;
 
 % initial the touchpanels
-dev               = GetTouchDeviceIndices([], 1);
-info_front      = GetTouchDeviceInfo(dev(1));
+dev              = GetTouchDeviceIndices([], 1);
+info_front       = GetTouchDeviceInfo(dev(1));
 disp(info_front);
 % info_back      = GetTouchDeviceInfo(dev(2));
 % disp(info_back);
 RestrictKeysForKbCheck(KbName('ESCAPE'));
-trialN=20;
+trialN          = 20;
 TouchQueueCreate(win, dev(1));
 TouchQueueStart(dev(1));
 for i=1:trialN
-	vbl                 = Screen('Flip', win);
-    tstart              = vbl + ifi; %start is on the next frame
-	reward=0;
-	showTime=i*10;
+	vbl         = Screen('Flip', win);
+    tstart      = vbl + ifi; %start is on the next frame
+	reward      = 0;
+	showTime    = i*10;
 	while vbl < tstart + showTime
     Screen('DrawDots', win, [target_x_left,target_y],100,[255 0 0]);
     Screen('DrawDots', win, [target_x_right,target_y],100,[0 255 0]);
-    vbl = Screen('Flip', win, vbl + 0.5 * ifi);
+    vbl        = Screen('Flip', win, vbl + 0.5 * ifi);
 
     
 %     TouchQueueCreate(w, dev(2));
@@ -59,23 +59,22 @@ for i=1:trialN
       % Process all currently pending touch events:
       while ~KbCheck&&TouchEventAvail(dev)
         % Process next touch event 'evt':
-        evt        = TouchEventGet(dev, win,3); %[event, nremaining] = TouchEventGet(deviceIndex, windowHandle [, maxWaitTimeSecs=0]
-		X          = evt.MappedX;
-		Y          = evt.MappedY;
-		touched=check_touch_position(X,Y,target_x_left,target_y);
+        evt     = TouchEventGet(dev, win,3); %[event, nremaining] = TouchEventGet(deviceIndex, windowHandle [, maxWaitTimeSecs=0]
+		X       = evt.MappedX;
+		Y       = evt.MappedY;
+		touched = check_touch_position(X,Y,target_x_left,target_y);
         if evt.Pressed && touched
 %            driveMotor(a);
-           reward = 1;
-		   disp('good left monkey')
-		   
-		   break;
+        reward = 1;
+		disp('good left monkey')
+		  break;
 % 		else
 % 			disp('hello,human')
         end
 	  end
 	  if reward
 		   Screen('FillRect', win, baseColor)
-		   vbl = Screen('Flip', win);
+		   vbl    = Screen('Flip', win);
 		   tstart = vbl + ifi; 
 		   pause(2)
 		  break;
@@ -110,8 +109,8 @@ end
 
 
 function touched=check_touch_position(touch_x,touch_y,target_x,target_y)
-    window=200;%pixle
-	touched=0;
+    window  = 200;%pixle
+	touched = 0;
     if touch_x>target_x-window&&touch_x<target_x+window&&touch_y>target_y-window&&touch_y<target_y+window
 	   touched=1;
 	end

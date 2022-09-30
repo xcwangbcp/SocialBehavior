@@ -23,47 +23,47 @@ PsychDefaultSetup(2);
 baseColor        = [128 128 128];
 % PsychImaging('PrepareConfiguration');
 % PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible');
-screenid          = max(Screen('Screens'));
-[win, winRect] = Screen('OpenWindow', screenid, baseColor);
+screenid         = max(Screen('Screens'));
+[win, winRect]   = Screen('OpenWindow', screenid, baseColor);
 % Query frame duration: We use it later on to time 'Flips' properly for an
 % animation with constant framerate:
-ifi = Screen('GetFlipInterval', win);
+ifi              = Screen('GetFlipInterval', win);
 
 % Enable alpha-blending
 Screen('BlendFunction', win, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 % the coordinats of the 2 dots
 target_x_left    = winRect(3)/3;
-target_y          = winRect(4)/2;
-target_x_right = winRect(3)*2/3;
-showTime       = 10;
+target_y         = winRect(4)/2;
+target_x_right   = winRect(3)*2/3;
+showTime         = 10;
 
 % initial the touchpanels
-dev               = GetTouchDeviceIndices([], 1);
+dev             = GetTouchDeviceIndices([], 1);
 info_front      = GetTouchDeviceInfo(dev(1));
 disp(info_front);
-info_back      = GetTouchDeviceInfo(dev(2));
+info_back       = GetTouchDeviceInfo(dev(2));
 disp(info_back);
 RestrictKeysForKbCheck(KbName('ESCAPE'));
-trialN=50;
+trialN          = 50;
 TouchQueueCreate(win, dev(1));
 % TouchQueueStart(dev(1));
 TouchQueueCreate(win, dev(2));
 % TouchQueueStart(dev(2));
-text_left            ='front side monkey touched the target';
-text_right          ='back side monkey touched the target';
+text_left       = 'front side monkey touched the target';
+text_right      = 'back side monkey touched the target';
 for i=1:trialN
 	i
-	reward_front     = 0;
-	reward_back     = 0;
-	touched_front    =0;
-	touched_back    =0;
+	reward_front  = 0;
+	reward_back   = 0;
+	touched_front = 0;
+	touched_back  = 0;
 	showTime      = i*10;
-	vbl                = Screen('Flip', win);
-    tstart             = vbl + ifi; %start is on the next frame
+	vbl           = Screen('Flip', win);
+    tstart        = vbl + ifi; %start is on the next frame
 	while vbl < tstart + showTime
     Screen('DrawDots', win, [target_x_left,target_y],100,[255 0 0]);
 %     Screen('DrawDots', win, [target_x_right,target_y],100,[0 255 0]);
-    vbl = Screen('Flip', win, vbl + 0.5 * ifi);
+    vbl           = Screen('Flip', win, vbl + 0.5 * ifi);
 
     % Wait for the go!
     KbReleaseWait;
@@ -72,43 +72,41 @@ for i=1:trialN
    TouchQueueStart(dev(2));
       % Process all currently pending touch events:
       while ~KbCheck&&TouchEventAvail(dev(1))||~KbCheck&&TouchEventAvail(dev(2))
-		evt_front       = TouchEventGet(dev(1), win)
+		evt_front          = TouchEventGet(dev(1), win);
 		 if  isempty(evt_front)
-			 X_front         = 0
-		     Y_front         = 0;
-			 front.Pressed= 0;
+			 X_front       = 0;
+		     Y_front       = 0;
+			 front.Pressed = 0;
 		 else
-			 X_front         = evt_front.MappedX
-		     Y_front         = evt_front.MappedY;
-			 front.Pressed= evt_front.Pressed;
-		 end
-		
-		touched_front = check_touch_position(X_front,Y_front,target_x_left,target_y)
-		
-		evt_back         = TouchEventGet(dev(2), win)
+			 X_front       = evt_front.MappedX;
+		     Y_front       = evt_front.MappedY;
+			 front.Pressed = evt_front.Pressed;
+         end
+         %touched means to touche the right target
+		touched_front      = check_touch_position(X_front,Y_front,target_x_left,target_y);
+		evt_back           = TouchEventGet(dev(2), win);
 		 if  isempty(evt_back)
-			 X_back            = 0
-		     Y_back            = 0;
-			 back.Pressed   =0;
+			 X_back        = 0;
+		     Y_back        = 0;
+			 back.Pressed  = 0;
 		 else
-			 X_back            = evt_back.MappedX
-		     Y_back            = evt_back.MappedY;
-			 back.Pressed   = evt_back.Pressed;
+			 X_back        = evt_back.MappedX;
+		     Y_back        = evt_back.MappedY;
+			 back.Pressed  = evt_back.Pressed;
 	   end%[event, nremaining] = TouchEventGet(deviceIndex, windowHandle [, maxWaitTimeSecs=0]
 		
-		touched_back  = check_touch_position(X_back,Y_back,target_x_left ,target_y)
-	  
-		
-        if front.Pressed && touched_front 
+		touched_back       = check_touch_position(X_back,Y_back,target_x_left ,target_y);
+        
+        if front.Pressed&&touched_front % 
 %            driveMotor(a);
-           reward_front = 1;
+           reward_front    = 1;
 		   TouchQueueStop(dev(1));
 % 		   disp('good monkey on left')
 		end
 		
 		if back.Pressed && touched_back
 %            driveMotor(a);
-           reward_back = 1;
+           reward_back    = 1;
 		   TouchQueueStop(dev(2));
 % 		   disp('good monkey on left')
 		end
@@ -121,7 +119,7 @@ for i=1:trialN
 	  if reward_front
 		   Screen('FillRect', win, baseColor)
 		   Screen('DrawText',win,text_left,1920/2,target_y,[255 0 0]) 
-		   vbl = Screen('Flip', win);
+		   vbl    = Screen('Flip', win);
 		   tstart = vbl + ifi; 
 		   pause(1)  
 	  end
@@ -141,8 +139,6 @@ for i=1:trialN
 	end
 	
 end
-Screen('Close',win);
-sca;
 catch
   % ---------- Error Handling ---------- 
   % If there is an error in our code, we will end up here.
