@@ -127,7 +127,7 @@ for i=1:trialN
 	  if reward_back
 		   Screen('FillRect', win, baseColor)
 		   Screen('DrawText',win,text_right,1950/2,target_y,[0 255 0]) 
-		   vbl = Screen('Flip', win);
+		   vbl    = Screen('Flip', win);
 		   tstart = vbl + ifi; 
 		   pause(1)  
 	  end
