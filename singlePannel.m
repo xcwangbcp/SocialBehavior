@@ -8,8 +8,10 @@
 % a.pinMode(3,'output');
 % a.pinMode(11,'output');
 % a.pinMode(5,'input');
+clear;close;sca;
+a=arduinoManager();
+a.open;
 
-sca;
 try 
 Screen('Preference', 'SkipSyncTests', 0);
 PsychDefaultSetup(2);
@@ -64,7 +66,7 @@ for i=1:trialN
 		Y       = evt.MappedY;
 		touched = check_touch_position(X,Y,target_x_left,target_y);
         if evt.Pressed && touched
-%            driveMotor(a);
+           driveMotor(a);
         reward = 1;
 		disp('good left monkey')
 		  break;
@@ -115,54 +117,53 @@ function touched=check_touch_position(touch_x,touch_y,target_x,target_y)
 	   touched=1;
 	end
 end
-
-
 function driveMotor(a)
- delaylength = 0.01;
+ delaylength = 0.5;
  nbstep        = 8;
- for i=1:nbstep
-  writeDigitalPin(a,'D9', 0);   %//ENABLE CH A
-  writeDigitalPin(a,'D8', 1);   %//DISABLE CH B
-  writeDigitalPin(a,'D12',1);   %//Sets direction of CH A
-  writePWMVoltage(a,'D3', 5);    %//Moves CH A
+ for       i      = 1:nbstep
+%   check_sensor(a);
+  a.digitalWrite(9, 0);   %//ENABLE CH A
+  a.digitalWrite(8, 1);   %//DISABLE CH B
+  a.digitalWrite(12,1);   %//Sets direction of CH A
+  a.digitalWrite(3, 1);    %//Moves CH A
+  pause(delaylength);
+   
+%   check_sensor(a);
+  a.digitalWrite(9, 1);   %//DISABLE CH A
+  a.digitalWrite(8, 0);   %//ENABLE CH B
+  a.digitalWrite(13,0);  %//Sets direction of CH B
+  a.digitalWrite(11,1);   %//Moves CH B
   pause(delaylength);
   
-  
-  writeDigitalPin(a,'D9', 1);   %//DISABLE CH A
-  writeDigitalPin(a,'D8', 0);   %//ENABLE CH B
-  writeDigitalPin(a,'D13', 0); %//Sets direction of CH B
-  writePWMVoltage(a,'D11', 5);   %//Moves CH B
+%   check_sensor(a);
+  a.digitalWrite(9, 0); %//ENABLE CH A
+  a.digitalWrite(8, 1); %//DISABLE CH B
+  a.digitalWrite(12,0); %//Sets direction of CH A
+  a.digitalWrite(3, 1);  %//Moves CH A
   pause(delaylength);
   
-  
-  writeDigitalPin(a,'D9', 0); %//ENABLE CH A
-  writeDigitalPin(a,'D8', 1); %//DISABLE CH B
-  writeDigitalPin(a,'D12',0); %//Sets direction of CH A
-  writePWMVoltage(a,'D3', 5);  %//Moves CH A
+%   check_sensor(a);
+  a.digitalWrite(9, 1);   %//DISABLE CH A
+  a.digitalWrite(8, 0);   %//ENABLE CH B
+  a.digitalWrite(13,1);  %//Sets direction of CH B
+  a.digitalWrite(11,1);        %//Moves CH B
   pause(delaylength);
-
- 
-  writeDigitalPin(a,'D9',1);   %//DISABLE CH A
-  writeDigitalPin(a,'D8',0);   %//ENABLE CH B
-  writeDigitalPin(a,'D13',1);  %//Sets direction of CH B
-  writePWMVoltage(a,'D11',5);        %//Moves CH B
-  pause(delaylength);
-  
-  sensor=readDigitalPin(a,'D5');
-  if sensor ==0
-       break;
-  end
-  step=i;
  end
   stop_motor(a);
 end
 %   clear(a);
-
 function stop_motor(a)
-    delaylength = 0.01;
-    writeDigitalPin(a,'D9',1);  %//DISABLE CH A
-    writePWMVoltage(a,'D3', 0); %//stop Move CH A
-    writeDigitalPin(a,'D8',1);  %//DISABLE CH B
-    writePWMVoltage(a,'D11',0); %//stop Move CH B 
+    delaylength    = 0.01;% in seconds
+    a.digitalWrite(9,1);  %//DISABLE CH A
+    a.digitalWrite(3, 0); %//stop Move CH A
+    a.digitalWrite(8,1);  %//DISABLE CH B
+    a.digitalWrite(11,0); %//stop Move CH B 
     pause(delaylength);
+end
+
+function check_sensor(a)
+  sensor    = digitalReas(5);
+  if sensor ==0
+     stop_motor(a);
+  end
 end
