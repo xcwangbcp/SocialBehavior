@@ -22,7 +22,7 @@ for i =1:N
 		driveMotor(a_back );
 	end
 	monkey_front_touched=0;
-	monkey_back_touched=0;
+monkey_back_touched=0;
 	
 end
 
