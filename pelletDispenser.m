@@ -1,8 +1,10 @@
 clear;close;sca;
 a_front = arduinoManager('port','/dev/ttyACM0');a_front.open;a_front.shield = 'new';
+a_front.pinMode(2,'Input');
+a_front.digitalRead(2);
 
 a_back = arduinoManager('port','/dev/ttyACM1');a_back.open;a_back.shield = 'old';
-% a.pinMode(8,'output');
+a.pinMode(2,'output');
 N     = 10;
 x     = randperm(N);
 monkey_front_touched=0;

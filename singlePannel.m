@@ -66,21 +66,26 @@ for i=1:trialN
 		Y       = evt.MappedY;
 		touched = check_touch_position(X,Y,target_x_left,target_y);
         if evt.Pressed && touched
+			Screen('FillRect', win, baseColor)
+		    vbl    = Screen('Flip', win);
+		   tstart = vbl + ifi; 
            driveMotor(a);
-        reward = 1;
-		disp('good left monkey')
+			reward = 1;
+			
+			disp('good left monkey')
+			clear evt
 		  break;
 % 		else
 % 			disp('hello,human')
         end
 	  end
-	  if reward
-		   Screen('FillRect', win, baseColor)
-		   vbl    = Screen('Flip', win);
-		   tstart = vbl + ifi; 
-		   pause(2)
-		  break;
-	  end
+% 	  if reward
+% 		   Screen('FillRect', win, baseColor)
+% 		   vbl    = Screen('Flip', win);
+% 		   tstart = vbl + ifi; 
+% 		   pause(1)
+% 		  break;
+% 	  end
 	end
 	
 end
@@ -118,7 +123,7 @@ function touched=check_touch_position(touch_x,touch_y,target_x,target_y)
 	end
 end
 function driveMotor(a)
- delaylength = 0.5;
+ delaylength = 0.1;
  nbstep        = 8;
  for       i      = 1:nbstep
 %   check_sensor(a);
