@@ -8,17 +8,17 @@
 % a.pinMode(3,'output');
 % a.pinMode(11,'output');
 % a.pinMode(5,'input');
-clear;close;sca;
-a=arduinoManager();
-a.open;
+% clear;close;sca;
+a=arduinoManager();a.openGUI=false;a.open;
+
 
 try 
 Screen('Preference', 'SkipSyncTests', 0);
 PsychDefaultSetup(2);
-baseColor        = [128 128 128];
+baseColor      = [128 128 128];
 % PsychImaging('PrepareConfiguration');
 % PsychImaging('AddTask', 'General', 'FloatingPoint32BitIfPossible');
-screenid          = max(Screen('Screens'));
+screenid       = max(Screen('Screens'));
 [win, winRect] = Screen('OpenWindow', screenid, baseColor);
 % Query frame duration: We use it later on to time 'Flips' properly for an
 % animation with constant framerate:
@@ -33,63 +33,64 @@ target_x_right   = winRect(3)*2/3;
 showTime         = 10;
 
 % initial the touchpanels
-dev              = GetTouchDeviceIndices([], 1);
-info_front       = GetTouchDeviceInfo(dev(1));
+dev               = GetTouchDeviceIndices([], 1);
+info_front        = GetTouchDeviceInfo(dev);
 disp(info_front);
 % info_back      = GetTouchDeviceInfo(dev(2));
 % disp(info_back);
 RestrictKeysForKbCheck(KbName('ESCAPE'));
 trialN          = 20;
-TouchQueueCreate(win, dev(1));
-TouchQueueStart(dev(1));
+TouchQueueCreate(win, dev);
+% TouchQueueStart(dev);
 for i=1:trialN
 	vbl         = Screen('Flip', win);
     tstart      = vbl + ifi; %start is on the next frame
 	reward      = 0;
 	showTime    = i*10;
+	TouchQueueStart(dev);
 	while vbl < tstart + showTime
-    Screen('DrawDots', win, [target_x_left,target_y],100,[255 0 0]);
-    Screen('DrawDots', win, [target_x_right,target_y],100,[0 255 0]);
-    vbl        = Screen('Flip', win, vbl + 0.5 * ifi);
+		Screen('DrawDots', win, [target_x_left,target_y],100,[255 0 0]);
+		Screen('DrawDots', win, [target_x_right,target_y],100,[0 255 0]);
+		vbl        = Screen('Flip', win, vbl + 0.5 * ifi);
 
-    
-%     TouchQueueCreate(w, dev(2));
-%     TouchQueueStart(dev(2));
+
     % Wait for the go!
-    KbReleaseWait;
-%   while ~KbCheck
+		KbReleaseWait;
+		touch_times=0;
+		q_num=TouchEventAvail(dev);
       % Process all currently pending touch events:
-      while ~KbCheck&&TouchEventAvail(dev)
+		while ~KbCheck&&q_num>1
         % Process next touch event 'evt':
-        evt     = TouchEventGet(dev, win,3); %[event, nremaining] = TouchEventGet(deviceIndex, windowHandle [, maxWaitTimeSecs=0]
-		X       = evt.MappedX;
-		Y       = evt.MappedY;
-		touched = check_touch_position(X,Y,target_x_left,target_y);
-        if evt.Pressed && touched
-			Screen('FillRect', win, baseColor)
-		    vbl    = Screen('Flip', win);
-		   tstart = vbl + ifi; 
-           driveMotor(a);
-			reward = 1;
-			
-			disp('good left monkey')
-			clear evt
-		  break;
+			[evt,nremaining] = TouchEventGet(dev, win,5); %[event, nremaining] = TouchEventGet(deviceIndex, windowHandle [, maxWaitTimeSecs=0]
+			X                = evt.MappedX;
+			Y                = evt.MappedY;
+			touched          = check_touch_position(X,Y,target_x_left,target_y);
+% 			evt
+% 			nremaining
+			if evt.Pressed && touched&&evt.Type==2
+				reward = 1;
+				disp('good monkey')
+				break;
 % 		else
 % 			disp('hello,human')
-        end
+			end
+		end
+	   if reward
+		   Screen('FillRect', win, baseColor)
+		   vbl    = Screen('Flip', win);
+		   tstart = vbl + ifi; 
+		   touch_times=touch_times+1;
+		   driveMotor(a);
+           clear evt
+		   q_num=0;
+		   TouchEventFlush(dev);
+		   TouchQueueStop(dev);
+		   pause(1)
+		  break;
 	  end
-% 	  if reward
-% 		   Screen('FillRect', win, baseColor)
-% 		   vbl    = Screen('Flip', win);
-% 		   tstart = vbl + ifi; 
-% 		   pause(1)
-% 		  break;
-% 	  end
 	end
-	
 end
-
+sca
 catch
   % ---------- Error Handling ---------- 
   % If there is an error in our code, we will end up here.
@@ -98,7 +99,7 @@ catch
   % to the MATLAB prompt even if there is an error in our code.  Without this try-catch
   % block, Screen could still have control of the display when MATLAB throws an error, in
   % which case the user will not see the MATLAB prompt.
-    Screen('Close',win);
+%     Screen('Close',win);
   sca;
   % stop the motor
 %   stop_motor(a);
@@ -123,9 +124,9 @@ function touched=check_touch_position(touch_x,touch_y,target_x,target_y)
 	end
 end
 function driveMotor(a)
- delaylength = 0.1;
- nbstep        = 8;
- for       i      = 1:nbstep
+ delaylength = 0.01;
+ nbstep      = 8;
+ for       i = 1:nbstep
 %   check_sensor(a);
   a.digitalWrite(9, 0);   %//ENABLE CH A
   a.digitalWrite(8, 1);   %//DISABLE CH B

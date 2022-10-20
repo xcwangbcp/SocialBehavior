@@ -36,13 +36,13 @@ ifi                     = Screen('GetFlipInterval', win);
 % Enable alpha-blending
 Screen('BlendFunction', win, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 % the coordinats of the 2 dots
-target_x_left    = winRect(3)/3;
-target_y          = winRect(4)/2;
+target_x_left   = winRect(3)/3;
+target_y        = winRect(4)/2;
 target_x_right  = winRect(3)*2/3;
-showTime       = 10;
+showTime        = 10;
 
 % initial the touchpanels
-dev               = GetTouchDeviceIndices([], 1);
+dev             = GetTouchDeviceIndices([], 1);
 info_front      = GetTouchDeviceInfo(dev(1));
 disp(info_front);
 info_back       = GetTouchDeviceInfo(dev(2));
