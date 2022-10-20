@@ -47,6 +47,7 @@ for i=1:trialN
     tstart      = vbl + ifi; %start is on the next frame
 	reward      = 0;
 	showTime    = i*10;
+	TouchEventFlush(dev);
 	TouchQueueStart(dev);
 	while vbl < tstart + showTime
 		Screen('DrawDots', win, [target_x_left,target_y],100,[255 0 0]);
@@ -83,7 +84,7 @@ for i=1:trialN
 		   driveMotor(a);
            clear evt
 		   q_num=0;
-		   TouchEventFlush(dev);
+
 		   TouchQueueStop(dev);
 		   pause(1)
 		  break;
