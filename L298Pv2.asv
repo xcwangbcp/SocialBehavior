@@ -13,9 +13,9 @@ end
 
 
 function driveMotor(a)
- delaylength = 0.02;
- nbstep      = 8;
- for       i = 1:nbstep
+ delaylength = 0.03;
+ nbstep        = 8;
+ for       i      = 1:nbstep
 	 i
 %   check_sensor(a);
 %   sensor    = a.digitalRead(2)

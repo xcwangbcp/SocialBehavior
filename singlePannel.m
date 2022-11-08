@@ -1,4 +1,4 @@
-% clear 
+clear 
 % delete(instrfind({'Port'},{'COM8'}))
 % a  = arduino('com8','uno','libraries','I2C');
 % a.pinMode(8,'output');
@@ -169,7 +169,7 @@ function stop_motor(a)
 end
 
 function check_sensor(a)
-  sensor    = digitalReas(5);
+  sensor    = a.digitalRead(2);
   if sensor ==0
      stop_motor(a);
   end
