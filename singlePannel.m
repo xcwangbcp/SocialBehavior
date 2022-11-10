@@ -9,7 +9,7 @@ clear
 % a.pinMode(11,'output');
 % a.pinMode(5,'input');
 % clear;close;sca;
-a=arduinoManager();a.openGUI=false;a.open;
+%a=arduinoManager();a.openGUI=false;a.open;
 
 
 try 
