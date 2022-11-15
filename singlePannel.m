@@ -9,7 +9,7 @@ clear
 % a.pinMode(11,'output');
 % a.pinMode(5,'input');
 % clear;close;sca;
-%a=arduinoManager();a.openGUI=false;a.open;
+a=arduinoManager();a.openGUI=false;a.open;a.shield='old';
 
 
 try 
@@ -81,7 +81,7 @@ for i=1:trialN
 		   vbl    = Screen('Flip', win);
 		   tstart = vbl + ifi; 
 		   touch_times=touch_times+1;
-		   driveMotor(a);
+		   a.stepper(46);
            clear evt
 		   q_num=0;
 
