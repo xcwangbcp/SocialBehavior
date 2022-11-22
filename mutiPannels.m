@@ -1,7 +1,7 @@
 clear;close;sca;
-a_front = arduinoManager('port','/dev/ttyACM0');a_front.open;a_front.shield = 'new';
-
-a_back = arduinoManager('port','/dev/ttyACM1');a_back.open;a_back.shield = 'old';
+% a_front = arduinoManager('port','/dev/ttyACM0');a_front.open;a_front.shield = 'new';
+% 
+% a_back = arduinoManager('port','/dev/ttyACM2');a_back.open;a_back.shield = 'old';
 
 % delete(instrfind({'Port'},{'COM8'}))
 % a  = arduino('com8','uno','libraries','I2C');
@@ -43,10 +43,10 @@ showTime        = 10;
 
 % initial the touchpanels
 dev             = GetTouchDeviceIndices([], 1);
-info_front      = GetTouchDeviceInfo(dev(1));
-disp(info_front);
-info_back       = GetTouchDeviceInfo(dev(2));
-disp(info_back);
+% info_front      = GetTouchDeviceInfo(dev(1));
+% disp(info_front);
+% info_back       = GetTouchDeviceInfo(dev(2));
+% disp(info_back);
 RestrictKeysForKbCheck(KbName('ESCAPE'));
 trialN          = 50;
 TouchQueueCreate(win, dev(1));
