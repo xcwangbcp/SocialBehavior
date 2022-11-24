@@ -33,7 +33,7 @@ try
 	RestrictKeysForKbCheck(KbName('ESCAPE'));
 	KbWait;
 	tfrontM.Qcreate(sv.win);
-	trialN			= 3;
+	trialN			= 10;
 	timeOut			= 5;
 	corretTrials    = 0;
 	reactiontime    = zeros(trialN,1);
@@ -77,20 +77,21 @@ try
 				fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
 
 				if front.Pressed && front.InBox
-				    draw(ms);
+				    
 					reward_front = 1;
 					corretTrials = corretTrials+1;
 					% disp('good monkey front');
+					sM.drawBackground;
+					sM.flip
 					break
 				end
 			end
 
 			if reward_front
-				flip(sM);
-				rM.stepper(46); % in degree
-				disp('good monkey front');
-			    
+
+				disp('good monkey front'); 
 				aM.beep(2000,0.1,0.1);
+				rM.stepper(46); 
 				tfrontM.stop;
 				break
 			end
@@ -104,7 +105,7 @@ try
 		else
 			fprintf('\n===>>> Trial %i took %.4f seconds\n',i, GetSecs-tStart);
 			reactiontime(i,1) = GetSecs-tStart;
-			sM.drawBackground;
+			
 			if reward_front
 				drawTextNow(sM,'FRONT CORRECT!')
 			end
