@@ -7,12 +7,14 @@ nameExp = [subject,'-',date,'.mat'];
 % setup the touch panels
 
 comment ='';
-% if   isempty(touchDevices)
+% if   isempty(toucbbbhDevices)
 % 	 comment = 'No Touch Screen are available, please check the usb end';
 % 	 fprintf('---> %s\n',comment);
 % end
-% ana.expType = {'Control','Audience Effect','Altruism ','Envy','Competition','Co-action'};%
-ana.taskNam = 'Co-action';
+% ana.expType = {'Control','Audience Effect','Altruis
+%  
+% m ','Envy','Competition','Co-action','test2touch'};%
+ana.taskNam = 'test2touch';
 M   = zeros(1,4);
 % ana = 'cooperation';
 [rM,tM] = inputDeviceManagement(ana.taskNam);
@@ -22,7 +24,8 @@ M   = zeros(1,4);
 
 try
 	sM = screenManager('backgroundColour', [0 0 0],'blend',true);
-	sv = sM.open;	fCross = fixationCrossStimulus();
+	sv = sM.open;	
+	fCross = fixationCrossStimulus();
 	myDisc = discStimulus('colour',[0 1 0],'size',2, 'sigma', 1); 
 	ms = metaStimulus;
 	ms{1} = myDisc;
@@ -37,20 +40,20 @@ try
 	   tM.Fron.setup;tM.Back.setup;
 	end
 % % % 	
-% 	KbReleaseWait;
-% 	KbQueueRelease;
-% 	drawTextNow(sM,'Please touch the screen to release the queue...')
-% 
-% % 	other setup
-% 	drawTextNow(sM,'Please press ESCAPE to start experiment...')
-% 	RestrictKeysForKbCheck(KbName('ESCAPE'));
-% 	KbWait;
+	KbReleaseWait;
+	KbQueueRelease;
+	drawTextNow(sM,'Please touch the screen to release the queue...')
+
+% 	other setup
+	drawTextNow(sM,'Please press ESCAPE to start experiment...')
+	RestrictKeysForKbCheck(KbName('ESCAPE'));
+	KbWait;
 	if  isempty(tM.Back)
 		tM.Fron.Qcreate(sv.win);
 	else
 		tM.Fron.Qcreate(sv.win);tM.Back.Qcreate(sv.win);
 	end
-	trialN			     = 5;
+	trialN			     = 10;
 	timeOut			     = 5;
     corretTrialsFront    = 0;
 	reactiontime         = zeros(trialN,1);
@@ -60,8 +63,10 @@ try
 		reward_back   = 0; touched_back  = 0;
 	    rewardType    ='';
 
-		myDisc.xPositionOut = randi([-3 3]);
-		myDisc.yPositionOut = randi([-1 4]);
+% 		myDisc.xPositionOut = randi([-3 3]);
+% 		myDisc.yPositionOut = randi([-1 4]);
+		myDisc.xPositionOut = 0;
+		myDisc.yPositionOut = 0;
 		myDisc.update;
 
 		mybox     = myDisc.mvRect;
@@ -80,9 +85,9 @@ try
 		while GetSecs < (tStart + timeOut)
 			draw(ms);
 			animate(ms);
-			vbl = flip(sM);
+			flip(sM);
 
-            if isempty(tM.Back)
+			if isempty(tM.Back)
 				fronEventAvail  = tM.Fron.eventAvail;
 				EventAvail      = fronEventAvail;
 			else
@@ -91,111 +96,79 @@ try
 				EventAvail      = fronEventAvail||backEventAvail;
 			end
 
-			while EventAvail&&~KbCheck
-               if	isempty(tM.Back)
+			while EventAvail%&&~KbCheck
+				if	isempty(tM.Back)
 					evt_front			  = tM.Fron.getEvent(sv.win);
 					if  ~isempty(evt_front)
-					front.X         = evt_front.MappedX;
-					front.Y         = evt_front.MappedY;
-					front.Pressed   = evt_front.Pressed;
-				    end
-				    front.InBox = checkBox(front.X, front.Y, mybox);
-					fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
-			   else
-                    evt_front			  = tM.Fron.getEvent(sv.win);
+						front.X         = evt_front.MappedX;
+						front.Y         = evt_front.MappedY;%
+						front.Pressed   = evt_front.Pressed;
+					end
+
+					% 					fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
+				else
+					evt_front		= tM.Fron.getEvent(sv.win);
 					if  ~isempty(evt_front)
-					front.X         = evt_front.MappedX;
-					front.Y         = evt_front.MappedY;
-					front.Pressed   = evt_front.Pressed;
-				    end
-				    front.InBox = checkBox(front.X, front.Y, mybox);
-					fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
+						front.X         = evt_front.MappedX;
+						front.Y         = evt_front.MappedY;
+						front.Pressed   = evt_front.Pressed;
+					end
+					front.InBox = checkBox(front.X, front.Y, mybox);
+					% 					fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
 					evt_back              = tM.Back.getEvent(sv.win);
 					if  ~isempty(evt_back)
-					back.X			= evt_back.MappedX;
-					back.Y			= evt_back.MappedY;
-					back.Pressed    = evt_back.Pressed;
-				    end
-				    back.InBox = checkBox(back.X, back.Y, myboxback);
-					fprintf('...back x=%.2f y=%.2f\n',back.X,back.Y)
-			   end
+						back.X			= evt_back.MappedX;
+						back.Y			= evt_back.MappedY;
+						back.Pressed    = evt_back.Pressed;
+					end
+					back.InBox = checkBox(back.X, back.Y, myboxback);
+					% 					fprintf('...back x=%.2f y=%.2f\n',back.X,back.Y)
+				end
 
-% 				
+				%
 				if front.Pressed && front.InBox
 					touched_front = 1;
 					tM.Fron.stop;
-% 					draw(ms);
+					% 					draw(ms);
 
 				end
-				
+
 				if back.Pressed && back.InBox%&&front.Pressed && front.InBox
 					touched_back = 1;
 					tM.Back.stop;
-						
+
 				end
 				switch  ana.taskNam
-					case {'Control','Audience Effect','Altruism','Envy','Competition'}
+					case {'Control','Audience Effect','Altruism','Envy','Competition'`}
+
 						if touched_front == 1 || touched_back==1
+
 							break;
 						end
-					case {Co-action}
+					case {'Co-action','test2touch'}
 						if touched_front == 1 && touched_back==1
 							break;
 						end
 				end
-			 end
-% 					corretTrialsFront = corretTrialsFront+1;
-% 					disp('good monkey front');
-			switch ana.taskNam
-						case {'Control','Audience Effect'}
-							if reward_front = 1;
+			end
 
-							end%;rewardType = 'Con&Aud';  %reward_front = 1; reward_back=0;
-						case {'Altruism'}
-				            reward_front = 0; reward_back  = 1; %reward_front = 0; reward_back=1;
-					    case {'Envy'}
-							reward_front = 1; reward_back = 1;%rewardType = 'Envy'; %reward_front= 1;reward_back = 1; t2>t1
-% 					 	case {'Competition'}
-% 							rewardType = 'ComF';
-			 end
-			
-			if reward_front == 1;
-				rM.Fron.stepper(46); % in degree
+
+			if touched_front == 1
+				% 				rM.Fron.stepper(46); % in degree
 				disp('front monkey get reward');
 				corretTrialsFront = corretTrialsFront+1;
 				tM.Fron.stop;
-		       
+
 				break
 			end
-			if reward_back == 1;%strcmpi(rewardType,'Altruism')||strcmpi(rewardType,'ComB')%|| reward_back
-				rM.Back.stepper(46); % in degree
+			if touched_back == 1%strcmpi(rewardType,'Altruism')||strcmpi(rewardType,'ComB')%|| reward_back
+				% 				rM.Back.stepper(46); % in degree
 				disp('back monkey get reward');
 				corretTrialsFront = corretTrialsFront+1;
 				tM.Fron.stop;
 				break
 			end
-			if strcmpi(rewardType,'Envy')%|| reward_back
-				rM.Back.stepper(46); % in degree
-				WaitSecs(1)
-				disp('back monkey get reward');
-				rM.Fron.stepper(46);
-				disp('front monkey get reward');
-				tM.Fron.stop;
-				reward_front=1;
-				corretTrialsFront = corretTrialsFront+1;
-				break
-			end
-            if strcmpi(rewardType,'Coaction')%|| reward_back
-				rM.Back.stepper(46); % in degree
-				disp('back monkey get reward');
-				tM.Back.stop;
-				rM.Fron.stepper(46);
-				disp('front monkey get reward');
-				tM.Fron.stop;
-				reward_front=1;
-				corretTrialsFront = corretTrialsFront+1;
-				break
-			end
+			%
 		end
 
 		fprintf('\n===>>> Trial %i took %.4f seconds\n',i, GetSecs-tStart);
@@ -217,27 +190,32 @@ try
 	tM.Fron.stop;
 	sM.close;ms.reset;sca;
 catch ME
+	disp('errors happen just now')
 	sM.close;sca;
 	rethrow(ME)
 end
 
 function [rM,tM]=inputDeviceManagement(taskName)
          touchDevices = GetTouchDeviceIndices([], 1);
-		 port=seriallist;
-         switch taskName
+		 port         = serialportlist;
+		 switch taskName
 			case {'Control','Audience Effect'}
-		    	rM.Fron = arduinoManager('ports','/dev/ttyACM0');rM.Fron.openGUI = false;rM.Fron.open;rM.Fron.shield = 'old';
+		    	rM.Fron = arduinoManager('ports',port(2));rM.Fron.openGUI = false;rM.Fron.open;rM.Fron.shield = 'old';
 				tM.Fron = touchManager;    tM.Fron.devices = touchDevices(1);
 				rM.Back = [];tM.Back=[];
 			case {'Altruism'}
 				tM.Fron = touchManager; tM.Fron.devices = touchDevices(1);
-		    	rM.Back  = arduinoManager('ports','/dev/ttyACM2');rM.Back.openGUI = false;rM.Back.open;rM.Back.shield = 'new';
+		    	rM.Back  = arduinoManager('ports',port(3));rM.Back.openGUI = false;rM.Back.open;rM.Back.shield = 'new';
 				rM.Fron=[];tM.Back=[];
 			case {'Envy','Competition','Co-action'}
-		    	rM.Fron = arduinoManager('port','/dev/ttyACM2');rM.Fron.openGUI = false;rM.Fron.open;rM.Fron.shield = 'old';
-	        	rM.Back = arduinoManager('port','/dev/ttyACM0');rM.Back.openGUI = false;rM.Back.open;rM.Back.shield = 'new';  
+		    	rM.Fron = arduinoManager('port',port(2));rM.Fron.openGUI = false;rM.Fron.open;rM.Fron.shield = 'old';
+	        	rM.Back = arduinoManager('port',port(3));rM.Back.openGUI = false;rM.Back.open;rM.Back.shield = 'new';  
             	tM.Fron = touchManager; tM.Fron.devices = touchDevices(1);
 	        	tM.Back = touchManager; tM.Back.devices = touchDevices(2);
+			 case {'test2touch'}
+				tM.Fron = touchManager; tM.Fron.devices = touchDevices(1);
+	        	tM.Back = touchManager; tM.Back.devices = touchDevices(2);
+				rM.Fron=[];   rM.Back=[];
 		  end
 end
 

@@ -47,13 +47,15 @@ info_front      = GetTouchDeviceInfo(dev(1));
 info_back       = GetTouchDeviceInfo(dev(2));
 % disp(info_back);
 % RestrictKeysForKbCheck(KbName('ESCAPE'));
-trialN          = 5;
+trialN          = 6;
+taskType        ='cooperation';
 TouchQueueCreate(win, dev(1));
 % TouchQueueStart(dev(1));
 TouchQueueCreate(win, dev(2));
 % TouchQueueStart(dev(2));
 text_left       = 'front side monkey touched the target';
 text_right      = 'back side monkey touched the target';
+text_both       = ' we two both get reward';
 KbReleaseWait;
 KbQueueRelease;
 % drawTextNow(sM,'Please press ESCAPE to start experiment...')
@@ -80,8 +82,10 @@ for i=1:trialN
    TouchEventFlush(dev(1));TouchEventFlush(dev(2));
    TouchQueueStart(dev(1));TouchQueueStart(dev(2)); % flush should be placed before the start
       % Process all currently pending touch events:
-	  while TouchEventAvail(dev(1))||TouchEventAvail(dev(2))
-             evt_front          = TouchEventGet(dev(1), win)
+	  q1=TouchEventAvail(dev(1));
+	  q2=TouchEventAvail(dev(2));
+	  while q1||q2
+             evt_front          = TouchEventGet(dev(1), win);
 		  if  isempty(evt_front)
 			  X_front       = 0;
 			  Y_front       = 0;
@@ -94,7 +98,7 @@ for i=1:trialN
 		 
 		  touched_front      = check_touch_position(X_front,Y_front,target_x_left,target_y);
 
-		  evt_back           = TouchEventGet(dev(2), win)
+		  evt_back           = TouchEventGet(dev(2), win);
 		  if  isempty(evt_back)
 			  X_back        = 0;
 			  Y_back        = 0;
@@ -108,48 +112,119 @@ for i=1:trialN
 		  touched_back       = check_touch_position(X_back,Y_back,target_x_right ,target_y);
 %           touched_back =1;
 % 		  back.Pressed =1;
-		  if front.Pressed&&touched_front %
-			  %            driveMotor(a);
-			  reward_front    = 1;
-			  disp('front monkey touched')
-			  % 		   TouchQueueStop(dev(1));
-			  % 		   disp('good monkey on left')
-		  end
+		switch taskType
+			case {'compitition'}
+				if front.Pressed&&touched_front %
+					%            driveMotor(a);
+					reward_front    = 1;
+					disp('front monkey touched')
+				end
+		
+				if back.Pressed && touched_back
+					%            driveMotor(a);
+					reward_back    = 1;
+					disp('back monkey touched')
+					% 		   TouchQueueStop(dev(2));
+					% 		   disp('good monkey on left')
+				end
+		
+				if reward_front==1||reward_back==1
+					% 			disp('both monkey touched')
+					Screen('FillRect', win, baseColor);
+					Screen('Flip', win);
+					break;
+				end
+			case {'cooperation'}
+				if front.Pressed&&touched_front %
+					%            driveMotor(a);
+					reward_front    = 1;
+					disp('front monkey touched')
+					Screen('DrawDots', win, [target_x_right,target_y],100,[0 255 0]);
+					Screen('Flip', win);
+					while 1
+						evt_back           = TouchEventGet(dev(2), win);
+						if  isempty(evt_back)
+							X_back        = 0;
+							Y_back        = 0;
+							back.Pressed  = 0;
+						else
+							X_back        = evt_back.MappedX;
+							Y_back        = evt_back.MappedY;
+							back.Pressed  = evt_back.Pressed;
+						end
+						%[event, nremaining] = TouchEventGet(deviceIndex, windowHandle [, maxWaitTimeSecs=0]
+						touched_back       = check_touch_position(X_back,Y_back,target_x_right ,target_y);
+						if back.Pressed==1&&touched_back==1
+							reward_back=1;
+							disp('back monkey touched')
+                            break;
+						end
+					end
+				elseif back.Pressed && touched_back
+						reward_back    = 1;
+						disp('back monkey touched')
+						Screen('DrawDots', win, [target_x_left,target_y],100,[255 0 0]);
+						Screen('Flip', win);
+						while 1
+							evt_front          = TouchEventGet(dev(1), win);
+							if  isempty(evt_front)
+								X_front       = 0;
+								Y_front       = 0;
+								front.Pressed = 0;
+							else
+								X_front       = evt_front.MappedX;   % if the event=0, you can not pass the results to the evt_front obj
+								Y_front       = evt_front.MappedY;
+								front.Pressed = evt_front.Pressed;
+							end
 
-		  if back.Pressed && touched_back
-			  %            driveMotor(a);
-			  reward_back    = 1;
-			  disp('back monkey touched')
-			  % 		   TouchQueueStop(dev(2));
-			  % 		   disp('good monkey on left')
-		  end
+							touched_front      = check_touch_position(X_front,Y_front,target_x_left,target_y);
+							if front.Pressed&&touched_front %
+								%            driveMotor(a);
+								reward_front    = 1;
+								disp('front monkey touched')
+								break;
+							end
+						end
+				end
 
-		  if reward_front==1||reward_back==1
-			  % 			disp('both monkey touched')
-			  Screen('FillRect', win, baseColor);
+% 			
+
+				if reward_front==1&&reward_back==1
+					% 			disp('both monkey touched')
+					Screen('FillRect', win, baseColor);
+					Screen('Flip', win);
+					break;
+				end
+		
+		end
+
+	  end
+	  switch taskType
+		  case {'compitition'}
+			  if reward_front
+				  % 		   Screen('FillRect', win, baseColor);
+				  Screen('DrawText',win,text_left,1920/2,target_y,[255 0 0]);
+				  Screen('Flip', win);
+				  WaitSecs(1)
+				  TouchQueueStop(dev(1));
+				  break;
+			  end
+
+			  if reward_back
+				  % 		   Screen('FillRect', win, baseColor);
+				  Screen('DrawText',win,text_right,1950/2,target_y,[0 255 0]);
+				  Screen('Flip', win);
+				  WaitSecs(1)
+				  TouchQueueStop(dev(2));
+				  break;
+			  end
+		  case {'cooperation'}
+			  Screen('DrawText',win,text_both ,1920/2-100,target_y,[255 0 0]);
 			  Screen('Flip', win);
+			  WaitSecs(1)
+			  TouchQueueStop(dev(1));
+			  TouchQueueStop(dev(2));
 			  break;
-		  end
-
-	  end
-	  if reward_front
-		  % 		   Screen('FillRect', win, baseColor);
-		  Screen('DrawText',win,text_left,1920/2,target_y,[255 0 0])
-		  Screen('Flip', win);
-% 		  tstart = vbl + ifi;
-		  WaitSecs(1)
-		  TouchQueueStop(dev(1));
-		  break;
-	  end
-
-	  if reward_back
-		  % 		   Screen('FillRect', win, baseColor);
-		  Screen('DrawText',win,text_right,1950/2,target_y,[0 255 0]);
-		  Screen('Flip', win);
-% 		  tstart = vbl + ifi;
-		  WaitSecs(1)
-		  TouchQueueStop(dev(2));
-		  break;
 	  end
 
 	  % 	  if touched_front ||touched_back

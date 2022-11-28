@@ -33,7 +33,7 @@ try
 	RestrictKeysForKbCheck(KbName('ESCAPE'));
 	KbWait;
 	tfrontM.Qcreate(sv.win);
-	trialN			= 10;
+	trialN			= 2;
 	timeOut			= 5;
 	corretTrials    = 0;
 	reactiontime    = zeros(trialN,1);
@@ -74,7 +74,7 @@ try
 					front.Pressed   = evt_front.Pressed;
 				end
 				front.InBox = checkBox(front.X, front.Y, mybox);
-				fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
+% 				fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
 
 				if front.Pressed && front.InBox
 				    
@@ -82,16 +82,16 @@ try
 					corretTrials = corretTrials+1;
 					% disp('good monkey front');
 					sM.drawBackground;
-			        sM.flip
+					sM.flip
 					break
 				end
 			end
 
 			if reward_front
-% 				flip(sM);
-				rM.stepper(46); % in degree
+
 				disp('good monkey front'); 
 				aM.beep(2000,0.1,0.1);
+				rM.stepper(46); 
 				tfrontM.stop;
 				break
 			end
@@ -134,7 +134,7 @@ end
 
 function touched = checkBox(x, y, box)
 touched = 0;
-checkWin= 10;
+checkWin= 0;
 if x>box(1)-checkWin && x<box(3)+checkWin && y>box(2)-checkWin&&y<box(4)+checkWin
 	touched = 1;
 end

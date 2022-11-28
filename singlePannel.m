@@ -34,11 +34,12 @@ showTime         = 10;
 
 % initial the touchpanels
 dev               = GetTouchDeviceIndices([], 1);
+dev=dev(1);
 info_front        = GetTouchDeviceInfo(dev);
 disp(info_front);
 % info_back      = GetTouchDeviceInfo(dev(2));
 % disp(info_back);
-RestrictKeysForKbCheck(KbName('ESCAPE'));
+% RestrictKeysForKbCheck(KbName('ESCAPE'));
 trialN          = 20;
 TouchQueueCreate(win, dev);
 % TouchQueueStart(dev);
@@ -56,7 +57,7 @@ for i=1:trialN
 
 
     % Wait for the go!
-		KbReleaseWait;
+% 		KbReleaseWait;
 		touch_times=0;
 		q_num=TouchEventAvail(dev);
       % Process all currently pending touch events:
@@ -86,7 +87,7 @@ for i=1:trialN
 		   q_num=0;
 
 		   TouchQueueStop(dev);
-		   pause(1)
+% 		   pause(1)
 		  break;
 	  end
 	end
