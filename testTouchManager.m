@@ -1,12 +1,14 @@
-classdef TestTouchManager < optickaCore
+classdef testTouchManager < optickaCore
 	%UNTITLED Summary of this class goes here
 	%   Detailed explanation goes here
 
 	%--------------------PUBLIC PROPERTIES----------%
 	properties
-		devices  = 6; 
+% 		devices  = 6; 
+		devices   = 10;
 		verbose  = false;
         win      = 10;
+		taskType = '';
 	end
 	properties (SetAccess=private,GetAccess=public)
 % 	    devices  
@@ -24,7 +26,7 @@ classdef TestTouchManager < optickaCore
 	%=======================================================================
 
 		% ===================================================================
-		function me = TestTouchManager(varargin)
+		function me = testTouchManager(varargin)
 		%> @fn touchManager
 		%> @brief Class constructor
 		%>
@@ -38,24 +40,36 @@ classdef TestTouchManager < optickaCore
 			me = me@optickaCore(args); %superclass constructor
 			me.parseArgs(args, me.allowedProperties);
 			[me.devices,me.names,me.allinfo] = GetTouchDeviceIndices([], 1);
-			
+			if   isempty(me.devices)
+				me.comment = 'No Touch Screens are available, please check the usb end';
+				fprintf('--->touchManager: %s\n',me.comment);
+			elseif length(me.devices)==1
+				me.comment = 'found one Touch Screen plugged ';
+				fprintf('--->touchManager: %s\n',me.comment);
+				me.comment = ['the device ID is:' num2str(me.devices)];
+				fprintf('===>touchManager: %s\n',me.comment);
+				% 				 		TouchQueueCreate(win, me.devices(1),me.nSlots);
+			elseif length(me.devices)==2
+				me.comment = 'found two Touch Screens plugged ';
+				fprintf('--->touchManager: %s\n',me.comment);
+				me.comment = ['the device ID is:' num2str(me.devices)];
+				fprintf('===>touchManager: %s\n',me.comment);
+			end
 			
 		end
 		%================SET UP TOUCH INPUT============
 		function  setup(me)
-% 					[me.devices,me.names,me.allinfo] = GetTouchDeviceIndices([], 1);
-					if   isempty(me.devices)
-				 		me.comment = 'No Touch Screen are available, please check the usb end';
-				 		fprintf('--->touchManager: %s\n',me.comment);
-					elseif length(me.devices)==1
-                 		me.comment = 'found one Touch Screen plugged ';
-				 		fprintf('--->touchManager: %s\n',me.comment);
-% 				 		TouchQueueCreate(win, me.devices(1),me.nSlots);
-					elseif length(me.devices)==2
-				 		me.comment = 'found two Touch Screens plugged ';
-				 		fprintf('--->touchManager: %s\n',me.comment);
-					end
+			% 			switch me.taskType
+			% 				case {'Control','Audience Effect','Altruism'}
+			% 					me.devices = me.devices(1);
+			% 				case {'Envy','Competition','Co-action','Cooperation'}
+			% 					me.devices = me.devices;
+			% 			end
+			me.comment='setting up the touch screen'
+			fprintf('===>touchManager: %s\n',me.comment);
+
 		end
+		%===============CREAT the QUEUE==========
 		function Qcreate(me,win)
 			     TouchQueueCreate(win, me.devices(1), me.nSlots) ;
 		end

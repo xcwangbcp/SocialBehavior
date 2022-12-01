@@ -85,7 +85,7 @@ for i=1:trialN
 	  q1=TouchEventAvail(dev(1));
 	  q2=TouchEventAvail(dev(2));
 	  while q1||q2
-             evt_front          = TouchEventGet(dev(1), win);
+             evt_front      = TouchEventGet(dev(1), win);
 		  if  isempty(evt_front)
 			  X_front       = 0;
 			  Y_front       = 0;
