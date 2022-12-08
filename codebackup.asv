@@ -4,9 +4,9 @@ rM=arduinoManager('ports','/dev/ttyACM0');
 rM.openGUI=false;
 rM.open;
 rM.shield='old'; % old or new, because the old one was sold out!
-% ButtonName = questdlg('which side touch pannel are you using?', ...
-% 	'Choose Touchpanel', ...
-% 	'Front', 'Back','Back');
+ButtonName = questdlg('which side touch pannel are you using?', ...
+	'Choose Touchpanel', ...
+	'Front', 'Back','Back');
 if ~exist('aM','var') || isempty(aM) || ~isa(aM,'audioManager')
 	aM=audioManager;
 end
@@ -41,7 +41,7 @@ try
 	drawTextNow(sM,'Please press ESCAPE to start experiment...')
 	RestrictKeysForKbCheck(KbName('ESCAPE'));
 	KbWait;
-	createQueue(tFront,whichDevice);
+	createQueue(tFront);
 	checkWin		= 50;
 	trialN			= 10;
 	timeOut			= 5;
@@ -57,22 +57,22 @@ try
         
 		fprintf('--->>> Stim Box: %i %i %i %i\n',mybox);
 		tEvent = struct('X', -inf,'Y', -inf,'Pressed', 0,'InBox', 0);
-		% 		front  = tEvent;rM
+		% 		front  = tEvent;
 
 		%Audio Manager
 
-		%if strcmpi(ButtonName,'Back')
-		%	mybox = [1920-mybox(1) mybox(2) 1920-mybox(3) mybox(4)];
-		%end
-		flush(tFront,whichDevice);
-		start(tFront,whichDevice);
+		if strcmpi(ButtonName,'Back')
+			mybox = [1920-mybox(1) mybox(2) 1920-mybox(3) mybox(4)];
+		end
+		flush(tFront);
+		start(tFront);
 		tStart = GetSecs;
 		while GetSecs < (tStart + timeOut)
 			draw(ms);
 			vbl = flip(sM);
-			temp  = eventAvail(tFront,whichDevice);
+			temp  = eventAvail(tFront);
 			while temp
-				evt_front			= getEvent(tFront,whichDevice);
+				evt_front			= getEvent(tFront);
 				if iscell(evt_front); evt_front = evt_front{1}; end
 				if  ~isempty(evt_front)
 					front.X         = evt_front.MappedX;
@@ -96,7 +96,7 @@ try
 				disp('good monkey front'); 
 				aM.beep(2000,0.1,0.1);
 				rM.stepper(46); 
-% 				stop(tFront,whichDevice);
+				tFront.stop;
 				break
 			end
 		end
