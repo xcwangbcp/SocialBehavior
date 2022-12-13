@@ -123,7 +123,7 @@ try
 						front.Y         = evt_front.MappedY;
 						front.Pressed   = evt_front.Pressed;
 					end
-					front.InBox = checkBox(front.X, front.Y, mybox)
+					front.InBox = checkBox(front.X, front.Y, mybox);
 					fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
 					evt_back              = tM.Back.getEvent(sv.win);
 					if  ~isempty(evt_back)

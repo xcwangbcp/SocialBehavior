@@ -96,7 +96,7 @@ for i=1:trialN
 			  front.Pressed = evt_front.Pressed;
 		  end
 		 
-		  touched_front      = check_touch_position(X_front,Y_front,target_x_right,target_y);
+		  touched_front      = check_touch_position(X_front,Y_front,target_x_right,target_y)
 
 		  evt_back           = TouchEventGet(dev(1), win);
 		  if  isempty(evt_back)

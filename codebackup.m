@@ -3,10 +3,15 @@ clear;close;sca;
 rM=arduinoManager('ports','/dev/ttyACM0');
 rM.openGUI=false;
 rM.open;
-rM.shield='old'; % old or new, because the old one was sold out!
-% ButtonName = questdlg('which side touch pannel are you using?', ...
-% 	'Choose Touchpanel', ...
-% 	'Front', 'Back','Back');
+rM.shield ='old'; % old or new!
+touchSide = questdlg('which side touch pannel are you using?', ...
+	'Choose Touchpanel', ...
+	'Front', 'Back','Back');
+if strcmpi(touchSide,'Back')
+	whichDevice = 1; % to choose the back side
+else
+	whichDevice = 2; % to choose the front side
+end
 if ~exist('aM','var') || isempty(aM) || ~isa(aM,'audioManager')
 	aM=audioManager;
 end
@@ -14,6 +19,7 @@ aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 try
 	%General setting
+	tic
 	sM = screenManager('backgroundColour', [0 0 0],'blend',true);
 	sv = sM.open;
 	myDisc = discStimulus('colour',[0 1 0],'size',2, 'sigma', 1);
@@ -29,7 +35,7 @@ try
 	subject='tset';
 	nameExp=[subject,'-',date,'.mat'];
 
-	whichDevice = 1;
+% 	whichDevice = 1;
 	tFront=touchManager('device',whichDevice,'name','Front Screen'); % touch for front panel
 	setup(tFront, sM);
 
@@ -43,7 +49,7 @@ try
 	KbWait;
 	createQueue(tFront,whichDevice);
 	checkWin		= 50;
-	trialN			= 10;
+	trialN			= 5;
 	timeOut			= 5;
 	corretTrials    = 0;
 	reactiontime    = zeros(trialN,1);
@@ -61,9 +67,9 @@ try
 
 		%Audio Manager
 
-		%if strcmpi(ButtonName,'Back')
-		%	mybox = [1920-mybox(1) mybox(2) 1920-mybox(3) mybox(4)];
-		%end
+		if strcmpi(touchSide,'Back')
+			mybox = [1920-mybox(1) mybox(2) 1920-mybox(3) mybox(4)];
+		end
 		flush(tFront,whichDevice);
 		start(tFront,whichDevice);
 		tStart = GetSecs;
@@ -114,14 +120,16 @@ try
 			end
 		end
 
-		WaitSecs(2);
+		WaitSecs(5);
 	end
-
+toc
 	%% Saving experiment information and results in a file called Socialtask_SubjectX.mat (X is subject number)
 	results.subject = subject;
 	results.trialN = trialN;
 	results.corretTrials = corretTrials;
 	results.reactiontime = reactiontime;
+	results.TotalTime = toc/60;
+
 	%fout=sprintf('Socialtask_Subject%d.mat', subject);
 	save(nameExp, 'results');
 
