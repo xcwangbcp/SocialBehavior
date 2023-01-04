@@ -12,7 +12,7 @@ comment ='';
 % 	 fprintf('---> %s\n',comment);
 % end
 ana.expType = {'Control','Audience Effect','Altruism ','Envy','Competition','Cooperation','test2touch'};%
-ana.taskNam = ana.expType{4};
+ana.taskName = ana.expType{4};
 rewardFront = 0; rewardBack = 0;
 touchFront  = 1; rouchBcak  = 0;
 deviceUsed  = [rewardFront touchFront rewardBack rewardBack];

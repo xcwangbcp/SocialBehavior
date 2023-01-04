@@ -2,7 +2,7 @@ clear;close;sca;
 a_front = arduinoManager('port','/dev/ttyACM0');a_front.open;a_front.shield = 'old';
 a_back = arduinoManager('port','/dev/ttyACM1');a_back.open;a_back.shield = 'new';
 
-trialN          = 5;
+trialN          = 3;
 tic
 
 try
@@ -113,6 +113,7 @@ try
 				end
 				touched_back       = check_touch_position(X_back,Y_back,1920-target_x_right ,target_y);
 %Front or back press:
+             
 				switch taskType
 					case {'competition'}
 						if front.Pressed&&touched_front %
@@ -136,60 +137,6 @@ try
 							break;
 						end
 					case {'cooperation'}
-						if front.Pressed&&touched_front %
-%%%%%%% 				%            driveMotor(a);
-							reward_front    = 1;
-							disp('front monkey touched')
-							Screen('DrawDots', win, [target_x_right,target_y],100,[0 255 0]);
-							Screen('Flip', win);
-							while 1
-		%%%%%% back????
-								evt_back           = TouchEventGet(dev(1), win);
-								if  isempty(evt_back)
-									X_back        = 0;
-									Y_back        = 0;
-									back.Pressed  = 0;
-								else
-									X_back        = evt_back.MappedX;
-									Y_back        = evt_back.MappedY;
-									back.Pressed  = evt_back.Pressed;
-								end
-								%[event, nremaining] = TouchEventGet(deviceIndex, windowHandle [, maxWaitTimeSecs=0]
-								touched_back       = check_touch_position(X_back,Y_back,1920-target_x_left ,target_y);
-								if back.Pressed==1&&touched_back==1
-									reward_back=1;
-									disp('back monkey touched')
-									break;
-								end
-							end
-						elseif back.Pressed && touched_back
-							reward_back    = 1;
-							disp('back monkey touched')
-							Screen('DrawDots', win, [target_x_left,target_y],100,[255 0 0]);
-							Screen('Flip', win);
-							while 1
-								evt_front          = TouchEventGet(dev(2), win);
-								if  isempty(evt_front)
-									X_front       = 0;
-									Y_front       = 0;
-									front.Pressed = 0;
-								else
-									X_front       = evt_front.MappedX;   % if the event=0, you can not pass the results to the evt_front obj
-									Y_front       = evt_front.MappedY;
-									front.Pressed = evt_front.Pressed;
-								end
-
-								touched_front      = check_touch_position(X_front,Y_front,target_x_right,target_y);
-								if front.Pressed&&touched_front %
-									%            driveMotor(a);
-									reward_front    = 1;
-									disp('front monkey touched')
-									break;
-								end
-							end
-						end
-
-						%
 
 						if reward_front==1&&reward_back==1
 							% disp('both monkey touched')
@@ -198,15 +145,17 @@ try
 							break;
 						end
 				end
+			if GetSecs-tStart>5
+				break;
+			end
 			end
 			switch taskType
 				case {'competition'}
 					if reward_front
-% 						GetSecs ;
-% 						tf= GetSecs;
+						% 						GetSecs ;
+						% 						tf= GetSecs;
 						% 		   Screen('FillRect', win, baseColor);
 						Screen('DrawText',win,text_left,1920/2,target_y,[255 0 0]);
-
 						aM.beep(2000,0.1,0.1);
 						a_front.stepper(46);
 						Screen('Flip', win);
@@ -216,14 +165,14 @@ try
 					end
 
 					if reward_back
-% 						GetSecs ;
-% 						tb= GetSecs;
+						% 						GetSecs ;
+						% 						tb= GetSecs;
 						% 		   Screen('FillRect', win, baseColor);
 						Screen('DrawText',win,text_right,1950/2,target_y,[0 255 0]);
-						a_back.stepper(46);
 						aM.beep(1000,0.1,0.1);
+						a_back.stepper(46);
 						Screen('Flip', win);
-						WaitSecs(1)
+						WaitSecs(3)
 						TouchQueueStop(dev(2));
 						break;
 					end
@@ -274,7 +223,7 @@ end
 
 
 function touched=check_touch_position(touch_x,touch_y,target_x,target_y)
-window=100;%pixle
+window=50;%pixle
 touched=0;
 if touch_x>target_x-window&&touch_x<target_x+window&&touch_y>target_y-window&&touch_y<target_y+window
 	touched=1;
