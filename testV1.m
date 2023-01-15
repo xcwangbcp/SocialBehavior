@@ -47,15 +47,15 @@ tic
 	RestrictKeysForKbCheck(KbName('ESCAPE'));
 	KbWait;
 	
-	trialN			= 10;
+	trialN			= 3;
 	timeOut			= 5;
 	corretTrials    = 0;
 	reactiontime    = zeros(trialN,1);
 	for i=1:trialN
 		fprintf('\n===>>> Running Trial %i\n',i);
 		reward_front  = 0;
-		myDisc.xPositionOut = randi([-3 3]);
-		myDisc.yPositionOut = randi([-2 2]);
+		myDisc.xPositionOut = randi([-9 -7]);
+		myDisc.yPositionOut = randi([-1 1]);
 		myDisc.update;
 		mybox     = myDisc.mvRect;
 
@@ -133,7 +133,7 @@ tic
 			end
 		end
 
-		WaitSecs(1);
+		WaitSecs(4);
 	end
 toc
 	%% Saving experiment information and results in a file called Socialtask_SubjectX.mat (X is subject number)

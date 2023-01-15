@@ -8,11 +8,10 @@ tic
 try
 	Screen('Preference', 'SkipSyncTests', 0);
 	PsychDefaultSetup(2);
-	baseColor          = [1 1 1];
-
-	screenid            = max(Screen('Screens'));
+	baseColor        = [1 1 1];
+	screenid         = max(Screen('Screens'));
 	[win, winRect]   = Screen('OpenWindow', screenid, baseColor);
-	ifi                     = Screen('GetFlipInterval', win);
+	ifi              = Screen('GetFlipInterval', win);
 %-------------------
 
 	% Subject's name input
