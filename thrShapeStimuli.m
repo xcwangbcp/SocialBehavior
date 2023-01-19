@@ -1,6 +1,6 @@
 clear;close;sca;
-% a_front = arduinoManager('port','/dev/ttyACM0');a_front.open;a_front.shield = 'old';
-% a_back = arduinoManager('port','/dev/ttyACM1');a_back.open;a_back.shield = 'new';
+a_front = arduinoManager('port','/dev/ttyACM0');a_front.open;a_front.shield = 'old';
+a_back  = arduinoManager('port','/dev/ttyACM1');a_back.open; a_back.shield  = 'new';
 %Audio Manager
 if ~exist('aM','var') || isempty(aM) || ~isa(aM,'audioManager')
 	aM=audioManager;
@@ -34,16 +34,17 @@ try
 	%%showTime        = 5;
 %-----------------
 	% initial the touchpanels
+	choiceTouch     = 2;
 	dev             = GetTouchDeviceIndices([], 1);
-	info_front      = GetTouchDeviceInfo(dev(1));
+	info_front      = GetTouchDeviceInfo(dev(choiceTouch));
 	% disp(info_front);
 	info_back       = GetTouchDeviceInfo(dev(2));
-	disp(info_back);
+% 	disp(info_back);
 % 	RestrictKeysForKbCheck(KbName('ESCAPE'));
 
 	taskType        ='competition';
-	TouchQueueCreate(win, dev(1));
-	TouchQueueStart(dev(1));
+	TouchQueueCreate(win, dev(choiceTouch ));
+	TouchQueueStart(dev(choiceTouch ));
 % 	TouchQueueCreate(win, dev(2));
 % 	TouchQueueStart(dev(2));
 	text_left       = 'front-side was touched';
@@ -59,17 +60,20 @@ try
 	KbWait;
 	corretTrials.front = 0;
 	corretTrials.back  = 0 ;
+	corretTrials.poly  = 0 ;
 	reactiontime.front = zeros(trialN,1);
 	reactiontime.back  = zeros(trialN,1);
-	pixlespdegree = 17.6;
-	Num=8;
-	% the coordinats of the 2 dots
+	reactiontime.poly  = zeros(trialN,1); 
+	pixlespdegree = 17.6; % head distance to monitor
+	Num=3; %nimber of location around a big circle
+	circleRadius=7; % the big circle's size
+	% the coordinats of the 3 dots
 	target_x_left   = winRect(3)/3;
 	target_y        = winRect(4)/2;
 	target_x_right  = winRect(3)*2/3;
 	anglesDegLoc = linspace(0, 360, Num+1);
 	anglesRadLoc = anglesDegLoc * (pi / 180);
-	radiusLoc    = 15*pixlespdegree;
+	radiusLoc    = circleRadius*pixlespdegree;%%% the circle's radius
 	[xCenter, yCenter] = RectCenter(winRect);
 	% X and Y coordinates of the points defining out polygon, centred on the     获取这些点的坐标（以屏幕中心为中心点）
 	% centre of the screen
@@ -78,16 +82,19 @@ try
 		fprintf('\n===>>> Running Trial %i\n',i);
 		reward_front  = 0;
 		reward_back   = 0;
+		reward_poly   = 0;
 		touched_front = 0;
 		touched_back  = 0;
-		timeOut       = 2;
+		touched_poly  = 0;
+		rewardNo      = 0;
+		timeOut       = 4;
 
-		numSides = 4;
+		numSides = 5;
 		anglesDeg = linspace(0, 360, numSides + 1);
 		anglesRad = anglesDeg * (pi / 180);
-		radius    = 60;
-		yPosVectorLoc = sin(anglesRadLoc) .* radiusLoc + yCenter;
-		xPosVectorLoc = cos(anglesRadLoc) .* radiusLoc + xCenter*3/2;
+		radius    = 55; % the size of the ploy shape
+		yPosVectorLoc = sin(anglesRadLoc) .* radiusLoc + 650;
+		xPosVectorLoc = cos(anglesRadLoc) .* radiusLoc + 700;
 		locIndex      = randperm(Num,3);
 		squarePos     = [xPosVectorLoc(locIndex(1)),yPosVectorLoc(locIndex(1))]';
 		circlePos     = [xPosVectorLoc(locIndex(2)),yPosVectorLoc(locIndex(2))]';
@@ -95,26 +102,40 @@ try
 		yPosVector    = sin(anglesRad) .* radius + diamonPos(2);
 		xPosVector    = cos(anglesRad) .* radius + diamonPos(1);
 		rectColor     = [0 0 255];
+		% target location setting
+		circlePosT(2)=circlePos(2);
+		squarePosT(2)=squarePos(2);
+		diamonPosT(2)=diamonPos(2);
+		if choiceTouch==1
+			circlePosT(1)=1920-circlePos(1);
+			squarePosT(1)=1920-squarePos(1);
+			diamonPosT(1)=1920-diamonPos(1);
+		else
+			circlePosT(1)=circlePos(1);
+			squarePosT(1)=squarePos(1);
+			diamonPosT(1)=diamonPos(1);
+		end
 
 		% Cue to tell PTB that the polygon is convex (concave polygons require much       告知PTB这个多边形是凸的
 		isConvex = 1;
 		tStart = GetSecs; % on the next frame
+		TouchEventFlush(dev(choiceTouch));
+		% 			TouchEventFlush(dev(2));
+		TouchQueueStart(dev(choiceTouch));
+		% 			TouchQueueStart(dev(2)); % flush should be placed before the start
 		while tStart < (tStart + timeOut)
-			Screen('DrawDots', win, circlePos,80,[0 255 0],[0,0],2);
-			Screen('DrawDots', win, squarePos,80,[255 0 0]);
-			Screen('FillPoly', win, rectColor, [xPosVector; yPosVector]',isConvex);		
-			Screen('Flip', win);		
-%tStart
-			TouchEventFlush(dev(1));
-% 			TouchEventFlush(dev(2));
-			TouchQueueStart(dev(1));
-% 			TouchQueueStart(dev(2)); % flush should be placed before the start
-% 			Process all currently pending touch events:
-			q1=TouchEventAvail(dev(1));
-% 			q2=TouchEventAvail(dev(2));
+			Screen('DrawDots', win, circlePos,80,[125 125 0],[0,0],2);% Circle
+			Screen('DrawDots', win, squarePos,80,[255 0 0]);         % square
+			Screen('FillPoly', win, rectColor, [xPosVector; yPosVector]',isConvex); % poly
+			Screen('Flip', win);
+			%tStart
+
+			% 			Process all currently pending touch events:
+			q1=TouchEventAvail(dev(choiceTouch));
+			% 			q2=TouchEventAvail(dev(2));
 			while q1
 				% Event Front:
-				evt_front      = TouchEventGet(dev(1), win)
+				evt_front      = TouchEventGet(dev(choiceTouch), win);
 				if  isempty(evt_front)
 					X_front       = 0;
 					Y_front       = 0;
@@ -124,71 +145,106 @@ try
 					Y_front       = evt_front.MappedY;
 					front.Pressed = evt_front.Pressed;
 				end
-				circlePosT(1)=1920-circlePos(1);circlePosT(2)=circlePos(2);
-				squarePosT(1)=1920-squarePos(1);squarePosT(2)=squarePos(2);
-				diamonPosT(1)=1920-diamonPos(1);diamonPosT(2)=diamonPos(2);
+
 				touched_circle    = check_touch_position(X_front,Y_front,circlePosT);
 				touched_squre     = check_touch_position(X_front,Y_front,squarePosT);
 				touched_diamon    = check_touch_position(X_front,Y_front,diamonPosT);
 
 				if front.Pressed&&touched_circle
-					disp('front monkey touched,reward to front')
+					% 					disp('front monkey touched,reward to front')
+					textMonkey='front monkey touched,reward to front';			
 					reward_front    = 1;
-					corretTrials.front = corretTrials.front+1;
-					tf=GetSecs-tStart;
 					Screen('FillRect', win, baseColor);
 					Screen('Flip', win);
-				elseif touched_squre&&front.Pressed
-					disp('front monkey touched,reward to back')
-					reward_front    = 1;
 					corretTrials.front = corretTrials.front+1;
 					tf=GetSecs-tStart;
-					Screen('FillRect', win, baseColor);
-					Screen('Flip', win);
-				elseif touched_diamon&&front.Pressed
-					disp('front monkey touched,no reward')
-					reward_front    = 1;
-					corretTrials.front = corretTrials.front+1;
-					tf=GetSecs-tStart;
-					Screen('FillRect', win, baseColor);
-					Screen('Flip', win);
-				end
-				if reward_front
 					break;
+				elseif front.Pressed&&touched_squre
+					% 					disp('front monkey touched,reward to back')
+					textMonkey='front monkey touched, but reward to back one';
+					reward_back     = 1;
+					Screen('FillRect', win, baseColor);
+					Screen('Flip', win);
+		%			corretTrials.front = corretTrials.front+1;
+					corretTrials.back = corretTrials.back+1;
+					tb=GetSecs-tStart;
+					break;
+
+				elseif front.Pressed&&touched_diamon
+					% 					disp('front monkey touched,no reward')
+					textMonkey='front monkey touched,both sides get reward';
+					rewardNo        = 1;
+					reward_poly   = 1; %%
+					Screen('FillRect', win, baseColor);
+					Screen('Flip', win);
+			%		corretTrials.front = corretTrials.front+1; %%%
+					corretTrials.poly = corretTrials.poly+1;%%
+					tp=GetSecs-tStart;
+					break;
+					%
 				end
 
 				if GetSecs-tStart>5
 					break;
 				end
 			end
+			
 
 			if reward_front
-				Screen('DrawText',win,text_left,1920/2,target_y,[255 0 0]);
-% 				aM.beep(2000,0.1,0.1);
-% 				a_front.stepper(46);
-				
-				WaitSecs(1)
-				TouchQueueStop(dev(1));
+				TouchQueueStop(dev(choiceTouch));
+				Screen('DrawText',win,textMonkey,1920/2,target_y,[255 0 0]);
+				Screen('Flip', win);
+				a_front.stepper(46);
+				aM.beep(2000,0.1,0.1);
+				WaitSecs(2)
+				break;
+			elseif reward_back
+				TouchQueueStop(dev(choiceTouch));
+				Screen('DrawText',win,textMonkey,1920/2,target_y,[255 0 0]);
+				Screen('Flip', win);
+				a_back.stepper(46)
+				aM.beep(2000,0.1,0.1);
+				WaitSecs(2)
+				break;
+			elseif rewardNo==1
+				TouchQueueStop(dev(choiceTouch));
+				Screen('DrawText',win,textMonkey,1920/2,target_y,[255 0 0]);
+				Screen('Flip', win);
+				a_back.stepper(46)
+				a_front.stepper(46);
+				aM.beep(2000,0.1,0.1);
+				WaitSecs(2)
 				break;
 			end
 		end
-		end
+		WaitSecs(1)
 		fprintf('\n===>>> Trial %i took %.4f seconds\n',i, GetSecs-tStart);
 		toc
-		%% Saving experiment information and results in a file called Socialtask_SubjectX.mat (X is subject number)
-		if  reward_front
-			reactiontime.front(i,1) = tf;
-			results.corretTrials.front = corretTrials.front;
-			results.reactiontime.front = reactiontime.front;
-		end
-		if reward_back
-			reactiontime.back(i,1) = tb;
-			results.corretTrials.back = corretTrials.back;
-			results.reactiontime.back = reactiontime.back;
-		end
+	end
+	a_front.close;a_back.close;
+		
+	%% Saving experiment information and results in a file called Socialtask_SubjectX.mat (X is subject number)
+	if  reward_front
+		reactiontime.front(i,1) = tf;
+		results.corretTrials.front = corretTrials.front;
+		results.reactiontime.front = reactiontime.front;
+	end
+
+	if reward_back
+		reactiontime.back(i,1) = tb;
+		results.corretTrials.back = corretTrials.back;
+		results.reactiontime.back = reactiontime.back;
+	end
+
+	if  reward_poly
+		reactiontime.poly(i,1) = tp;
+		results.corretTrials.poly = corretTrials.poly;
+		results.reactiontime.poly = reactiontime.poly;
+	end
+
 		results.subject = subject;
 		results.trialN = trialN;
-
+		results.corretTrials= corretTrials;
 		results.reactiontime = reactiontime;
 		results.TotalTime = toc/60;
 		%fout=sprintf('Socialtask_Subject%d.mat', subject);
@@ -196,10 +252,10 @@ try
         
 		%%========================================
 	
-	sca;
-	KbReleaseWait;
+		sca;
+		KbReleaseWait;
 catch
-	
+% 	a_front.close;a_back.close;
 	sca;
 	psychrethrow(psychlasterror);
 end

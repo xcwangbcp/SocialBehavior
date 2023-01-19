@@ -14,8 +14,8 @@ if ~aM.isSetup;	aM.setup; end
 
 sM       = screenManager('backgroundColour', [0 0 0],'blend',true);
 sv       = sM.open;
-tMfront  = touchManager; % touch for front panel
 choice   = 2;
+tMfront  = touchManager('device', choice); % touch for front panel
 tMfront.setup(sM);
 
 ana.expType  = {'Control','Audience Effect','Altruism','Envy','Competition','Cooperation','test2touch'};%

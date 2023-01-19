@@ -1,10 +1,9 @@
 clear;close;sca;
 
+%Arduino Manager
+rMfront= arduinoManager('port','/dev/ttyACM0');rMfront.open;rMfront.shield='old'; % old or new, because the old one was sold out!
+rMback = arduinoManager('port','/dev/ttyACM1');rMback.open; rMback.shield ='new';
 
-
-% 
-% rMfront= arduinoManager('port','/dev/ttyACM0');rMfront.open;rMfront.shield='old'; % old or new, because the old one was sold out!
-% rMback = arduinoManager('port','/dev/ttyACM1');rMback.open; rMback.shield ='new';
 %Audio Manager
 if ~exist('aM','var') || isempty(aM) || ~isa(aM,'audioManager')
 	aM=audioManager;
@@ -12,24 +11,26 @@ end
 aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
+%Screen&Touch Manager
 sM       = screenManager('backgroundColour', [0 0 0],'blend',true);
 sv       = sM.open;
 tMfront  = touchManager; % touch for front panel
-choice   = 2;
+choice   = 2; % Front (2) or Back (1) touchscreen
 tMfront.setup(sM);
 
+% Which task to start
 ana.expType  = {'Control','Audience Effect','Altruism','Envy','Competition','Cooperation','test2touch'};%
 ana.taskName = ana.expType{1}; 
 try
 tic
 	myDisc = discStimulus('colour',[0 1 0],'size',2, 'sigma', 1);
-	
+	myDisc2 = discStimulus('colour',[1 1 0],'size',2, 'sigma', 1);
+
 	tMfront.createQueue(choice);
-%   tfrontM.stop;
 
 	ms = metaStimulus;
 	ms{1} = myDisc;
-	%ms{2} = fCross;
+	ms{2} = myDisc2;
 	setup(ms,sM);
 
 	% Subject's name input
@@ -47,20 +48,28 @@ tic
 	RestrictKeysForKbCheck(KbName('ESCAPE'));
 	KbWait;
 	
-	trialN			= 10;
+	trialN			= 7;
 	timeOut			= 5;
 	corretTrials    = 0;
+	Others          = 0;
 	reactiontime    = zeros(trialN,1);
 	for i=1:trialN
 		fprintf('\n===>>> Running Trial %i\n',i);
 		reward_front  = 0;
-		myDisc.xPositionOut = randi([-3 3]);
-		myDisc.yPositionOut = randi([-2 2]);
+		myDisc.xPositionOut = randi([-9 -7]);
+		myDisc.yPositionOut = randi([-1 1]);
 		myDisc.update;
 		mybox     = myDisc.mvRect;
 
+		myDisc2.xPositionOut = randi([-9 -7]);
+		myDisc2.yPositionOut = randi([-1 1]);
+		myDisc2.update;
+		mybox2     = myDisc2.mvRect;
+
 		fprintf('--->>> Stim Box: %i %i %i %i\n',mybox);
+		fprintf('--->>> Stim Box: %i %i %i %i\n',mybox2); %%
 		front = struct('X', -inf,'Y', -inf,'Pressed', 0,'InBox', 0);
+		front2 = struct('X', -inf,'Y', -inf,'Pressed', 0,'InBox2', 0); %%
 		tMfront.flush(choice);
 		tMfront.start(choice);
 		tStart = GetSecs;
@@ -80,6 +89,7 @@ tic
 					front.Pressed   = evt_front{1,1}.Pressed;
 				end
 				front.InBox = checkBox(front.X, front.Y, mybox);
+				front.InBox2 = checkBox(front.X, front.Y, mybox2); %%
 				fprintf('...front x=%.2f y=%.2f\n',front.X,front.Y)
 %                [result, ~, ~] = tfrontM.checkTouchWindow;
 
@@ -88,7 +98,17 @@ tic
 					tMfront.close(choice);
 					reward_front = 1;
 					corretTrials = corretTrials+1;
-					% disp('good monkey front');
+					disp('good monkey front');
+					sM.drawBackground;
+					sM.flip
+					break
+				end
+				if front.InBox2&&front.Pressed
+					TouchQueueStop(11);
+					tMfront.close(choice);
+					reward_front = 2;
+					Others = Others+1;
+					disp('Althruist monkey front');
 					sM.drawBackground;
 					sM.flip
 					break
@@ -101,7 +121,6 @@ tic
 						disp('good monkey front');
 						aM.beep(2000,0.1,0.1);
 						rMfront.stepper(46);
-						
 						break
 					case {'Altruism'}
 						disp('good monkey front');
@@ -116,6 +135,16 @@ tic
 						break
 				end
 
+			end
+
+			if reward_front == 2
+				switch  ana.taskName
+					case {'Altruism'}
+					disp('Althruistic monkey front');
+					aM.beep(1000,0.1,0.1);
+					rMback.stepper(46);
+					break
+				end
 			end
 		end
 
@@ -140,6 +169,7 @@ toc
 	results.subject = subject;
 	results.trialN = trialN;
 	results.corretTrials = corretTrials;
+	results.Others = Others;
 	results.reactiontime = reactiontime;
 	results.TotalTime = toc/60;
 	%fout=sprintf('Socialtask_Subject%d.mat', subject);
