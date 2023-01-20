@@ -1,7 +1,5 @@
 function multipleShapes()
 
-sca;
-
 a_front = arduinoManager('port','/dev/ttyACM1');a_front.open;a_front.shield = 'old';
 a_back  = arduinoManager('port','/dev/ttyACM0');a_back.open; a_back.shield  = 'new';
 
@@ -129,7 +127,7 @@ try
 			for j = 1: nObjects
 				if results(j) == true
 					textMonkey = ['Touched: ' upper(stims{j})];
-					evalresults.trialN = trialN;([stims{i} 'Reward = true;']);
+					eval([stims{i} 'Reward = true;']);
 					correctTrials.(stims{j}) = correctTrials.(stims{j})+1;
 					reactionTime.(stims{j})(i,1) = GetSecs-tStart;
 					disp(textMonkey);
