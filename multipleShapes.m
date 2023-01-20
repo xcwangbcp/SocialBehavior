@@ -1,7 +1,7 @@
 function multipleShapes()
 
-a_front = arduinoManager('port','/dev/ttyACM1');a_front.open;a_front.shield = 'old';
-a_back  = arduinoManager('port','/dev/ttyACM0');a_back.open; a_back.shield  = 'new';
+a_front = arduinoManager('port','/dev/ttyACM0','shield','old'); a_front.open;
+a_back  = arduinoManager('port','/dev/ttyACM1','shield','new'); a_back.open;
 
 %Audio Manager
 if ~exist('aM','var') || isempty(aM) || ~isa(aM,'audioManager')
@@ -11,9 +11,10 @@ aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
 stims			= {'self', 'other', 'both', 'none'};
-trialN          = 5;
+trialN          = 10;
 choiceTouch     = 1;
-debug			= false;
+debug			= true;
+dummy			= false;
 timeOut			= 3;
 nObjects		= length(stims);
 stimSize		= 16;
@@ -50,7 +51,7 @@ try
 	setup(none, s);
 
 	%==============================================INITIATE THE TOUCHPANELS
-	tM = touchManager('device',choiceTouch,'isDummy',true);
+	tM = touchManager('device',choiceTouch,'isDummy',dummy);
 	setup(tM, s);
 
 	%==============================================GET SUBJECT NAME
@@ -79,16 +80,16 @@ try
 	start(tM);
 	
 	%==============================================MAIN TRIAL LOOP
-	for i=1:trialN
-		fprintf('\n===>>> Running Trial %i\n',i);
+	for iTrial=1:trialN
+		fprintf('\n===>>> Running Trial %i\n',iTrial);
 
 		% ----- set the positions for this trial
 		randOffset = round(rand * 360);
-		for i = 1 : nObjects
-			theta = deg2rad((degsPerStep * i) + randOffset);
+		for jObj = 1 : nObjects
+			theta = deg2rad((degsPerStep * jObj) + randOffset);
 			[x,y] = pol2cart(theta, circleRadius);
-			eval([stims{i} '.xPositionOut = ' num2str(x) ';']);
-			eval([stims{i} '.yPositionOut = ' num2str(y) ';']);
+			eval([stims{jObj} '.xPositionOut = ' num2str(x) ';']);
+			eval([stims{jObj} '.yPositionOut = ' num2str(y) ';']);
 		end
 		% ----- randomise
 		if randomise
@@ -103,17 +104,18 @@ try
 		end
 		% ----- update stimuli with new values
 		update(self); update(other); update(both); update(none);
-
+ 
 		% ====================================SHOW STIMULI
+		textMonkey		= 'no touch'; %%
 		selfReward = false; otherReward = false; bothReward = false; noneReward = false;
 		x = []; y = []; txt = ''; textMonkey = ''; anyTouch = false; cWins = [];
 		flush(tM);
 		vbl = flip(s); tStart = vbl;
 		while vbl <= (tStart + timeOut) && anyTouch == false
-			for j = 1 : nObjects
+			for jObj = 1 : nObjects
 				% we use eval as our object names are stored in an array
-				eval(['draw(' stims{j} ');']);
-				eval(['cWins(j,:) = toDegrees(s, ' stims{j} '.mvRect, ''rect'');']);
+				eval(['draw(' stims{jObj} ');']);
+				eval(['cWins(j,:) = toDegrees(s, ' stims{jObj} '.mvRect, ''rect'');']);
 			end
 			if debug; drawScreenCenter(s); drawGrid(s); drawText(s, txt); end %#ok<*UNRCH> 
 			vbl = flip(s);
@@ -124,12 +126,12 @@ try
 			
 			if ~any(results); continue; end
 
-			for j = 1: nObjects
-				if results(j) == true
-					textMonkey = ['Touched: ' upper(stims{j})];
-					eval([stims{i} 'Reward = true;']);
-					correctTrials.(stims{j}) = correctTrials.(stims{j})+1;
-					reactionTime.(stims{j})(i,1) = GetSecs-tStart;
+			for jObj = 1: nObjects
+				if results(jObj) == true
+					textMonkey = ['Touched: ' upper(stims{jObj})];
+					eval([stims{jObj} 'Reward = true;'])
+					correctTrials.(stims{jObj}) = correctTrials.(stims{jObj})+1;
+					reactionTime.(stims{jObj})(iTrial,1) = GetSecs-tStart;
 					disp(textMonkey);
 					anyTouch = true;
 					break
