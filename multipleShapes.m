@@ -14,18 +14,18 @@ if ~aM.isSetup;	aM.setup; end
 
 stims			= {'self', 'none', 'other', 'both'};
 trialN          = 10 ;
-choiceTouch     = 1;
+choiceTouch     = 2;
 debug			= false;
 dummy			= false;
 timeOut			= 3;
 nObjects		= length(stims);
-stimSize		= 12;
-circleRadius	= 14;
+stimSize		= 11;
+circleRadius	= 12;
 degsPerStep		= 360 / nObjects;
 pxPerCm			= 16;
 distance		= 23;
-centerX			= -35;
-centerY			= +20;
+centerY			= +30;
+centerX			= -5;
 colourSelf		= [0.8 0.5 0.3];
 colourOther		= [0.3 0.5 0.8];
 colourBoth		= [0.8 0.3 0.5];
@@ -123,7 +123,7 @@ try
 			if debug; drawScreenCenter(s); drawGrid(s); drawText(s, txt); end %#ok<*UNRCH> 
 			vbl = flip(s);
 
-			[results, x, y] = checkTouchWindows(tM, cWins);
+			[results, x, y] = checkTouchWindows(tM, cWins,choiceTouch);
 
 			if debug && ~isempty(x); txt = sprintf('x = %.2f Y = %.2f',x(1),y(1)); end
 			
