@@ -1,7 +1,9 @@
+
 function multipleShapes()
 
-a_front = arduinoManager('port','/dev/ttyACM0','shield','old'); a_front.open;
-a_back  = arduinoManager('port','/dev/ttyACM1','shield','new'); a_back.open;
+
+a_front = arduinoManager('port','/dev/ttyACM1'); a_front.open;
+a_back  = arduinoManager('port','/dev/ttyACM0'); a_back.open;
 
 %Audio Manager
 if ~exist('aM','var') || isempty(aM) || ~isa(aM,'audioManager')
@@ -10,20 +12,20 @@ end
 aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
-stims			= {'self', 'other', 'both', 'none'};
-trialN          = 10;
+stims			= {'self', 'none', 'other', 'both'};
+trialN          = 50 ;
 choiceTouch     = 1;
 debug			= false;
 dummy			= false;
 timeOut			= 3;
 nObjects		= length(stims);
-stimSize		= 16;
-circleRadius	= 20;
+stimSize		= 9;
+circleRadius	= 12;
 degsPerStep		= 360 / nObjects;
 pxPerCm			= 16;
-distance		= 25;
-centerX			= -20;
-centerY			= +20;
+distance		= 20;
+centerY			= +35;
+centerX			= -30;
 colourSelf		= [0.8 0.5 0.3];
 colourOther		= [0.3 0.5 0.8];
 colourBoth		= [0.8 0.3 0.5];
@@ -60,9 +62,9 @@ try
 	
 	%==============================================
 	text='Please press ESCAPE to start experiment...';
-	drawTextNow(s,text);
+	drawTextNow(s,text);    
 	RestrictKeysForKbCheck(KbName('ESCAPE'));
-	KbWait;
+	KbWait;  
 
 	correctTrials.self	= 0;
 	correctTrials.other	= 0;
@@ -76,8 +78,8 @@ try
 	
 	%==============================================START TOUCH QUEUE
 	try Priority(1); end
-	createQueue(tM);
-	start(tM);
+	createQueue(tM,choiceTouch);
+	start(tM,choiceTouch);
 	
 	%==============================================MAIN TRIAL LOOP
 	for iTrial=1:trialN
@@ -109,19 +111,19 @@ try
 		textMonkey		= 'no touch'; %%
 		selfReward = false; otherReward = false; bothReward = false; noneReward = false;
 		x = []; y = []; txt = ''; textMonkey = ''; anyTouch = false; cWins = [];
-		flush(tM);
+		flush(tM,choiceTouch);
 		vbl = flip(s); tStart = vbl;
 		while vbl <= (tStart + timeOut) && anyTouch == false
 			for jObj = 1 : nObjects
 				% we use eval as our object names are stored in an array
 				eval(['draw(' stims{jObj} ');']);
-				eval(['cWins(j,:) = toDegrees(s, ' stims{jObj} '.mvRect, ''rect'');']);
+				eval(['cWins(jObj,:) = toDegrees(s, ' stims{jObj} '.mvRect, ''rect'');']);
 		%	eval(['cWins(j,:) = toDegrees(s, ' stims{jObj} '.mvRect, ''rect'');']);
 			end
 			if debug; drawScreenCenter(s); drawGrid(s); drawText(s, txt); end %#ok<*UNRCH> 
 			vbl = flip(s);
 
-			[results, x, y] = checkTouchWindows(tM, cWins);
+			[results, x, y] = checkTouchWindows(tM, cWins,choiceTouch);
 
 			if debug && ~isempty(x); txt = sprintf('x = %.2f Y = %.2f',x(1),y(1)); end
 			
@@ -149,14 +151,19 @@ try
 		elseif otherReward
 			aM.beep(2000,0.1,0.1);
 			a_back.stepper(46);
+					WaitSecs(2);
 		elseif bothReward
 			aM.beep(2000,0.1,0.1);
 			a_back.stepper(46);
+%			WaitSecs(1);50
 			a_front.stepper(46);
 		elseif noneReward
 			aM.beep(2000,0.1,0.1);
+	 			WaitSecs(2);
+
 		end
 		WaitSecs(3);
+
 	end
 
 	reactionTime.end = GetSecs;
@@ -177,14 +184,14 @@ try
 
 	% ====================================CLEAN UP
     close(s);
-	close(tM);
+	close(tM,choiceTouch);
 	reset(self); reset(other); reset(both); reset(none);
 	Priority(0); ShowCursor; sca;
 
 catch E
 
 	try close(s); end %#ok<*TRYNC> 
-	try close(tM); end
+	try close(tM,choiceTouch); end
 	reset(self); reset(other); reset(both); reset(none);
 	Priority(0); ShowCursor; sca;
 	rethrow(E);
@@ -196,4 +203,4 @@ function out = lim(in)
 	out = (in * (h - l))+l;
 end
 
-end % END FUNCTION
+end % END FUNCTION`

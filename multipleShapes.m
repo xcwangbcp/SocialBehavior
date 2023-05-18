@@ -13,19 +13,19 @@ aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
 stims			= {'self', 'none', 'other', 'both'};
-trialN          = 10 ;
-choiceTouch     = 2;
+trialN          = 25;
+choiceTouch     = 1;
 debug			= false;
 dummy			= false;
 timeOut			= 3;
 nObjects		= length(stims);
-stimSize		= 11;
-circleRadius	= 12;
+stimSize		= 9;
+circleRadius	= 11;
 degsPerStep		= 360 / nObjects;
 pxPerCm			= 16;
-distance		= 23;
-centerY			= +30;
-centerX			= -5;
+distance		= 20;
+centerY			= +40;
+centerX			= -30;
 colourSelf		= [0.8 0.5 0.3];
 colourOther		= [0.3 0.5 0.8];
 colourBoth		= [0.8 0.3 0.5];
