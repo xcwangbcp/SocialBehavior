@@ -13,8 +13,8 @@ aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
 stims			= {'self', 'none', 'other', 'both'};
-trialN          = 25;
-choiceTouch     = 1;
+trialN          = 50;
+choiceTouch     = 2;
 debug			= false;
 dummy			= false;
 timeOut			= 3;

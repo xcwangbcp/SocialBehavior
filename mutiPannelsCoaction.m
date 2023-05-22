@@ -52,6 +52,7 @@ disp(info_back);
 trialN          = 15;
 taskType        ='competition';
 taskType        ='cooperation';
+%sca
 %taskType        ='co-action';
 
 TouchQueueCreate(win, dev(1));
