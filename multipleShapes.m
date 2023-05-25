@@ -12,9 +12,9 @@ end
 aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
-stims			= {'self', 'none', 'other', 'both'};
-trialN          = 50;
-choiceTouch     = 2;
+stims			= { 'none', 'both', 'self', 'other'};
+trialN          = 20;
+choiceTouch     = 1;
 debug			= false;
 dummy			= false;
 timeOut			= 3;
@@ -25,7 +25,7 @@ degsPerStep		= 360 / nObjects;
 pxPerCm			= 16;
 distance		= 20;
 centerY			= +40;
-centerX			= -30;
+centerX			= -35;
 colourSelf		= [0.8 0.5 0.3];
 colourOther		= [0.3 0.5 0.8];
 colourBoth		= [0.8 0.3 0.5];
@@ -38,6 +38,7 @@ try
 		'pixelsPerCm', pxPerCm,'distance', distance,...
 		'screenXOffset', centerX,'screenYOffset', centerY);
 	open(s);
+	fixationRemapper(s);
 	%==============================================CREATE STIMULI
 	self = imageStimulus('size', stimSize, 'colour', colourSelf,...
 		'fileName',[s.paths.root '/stimuli/star.png']);
@@ -53,7 +54,7 @@ try
 	setup(none, s);
 
 	%==============================================INITIATE THE TOUCHPANELS
-	tM = touchManager('device',choiceTouch,'isDummy',dummy);
+	tM = touchManager('device',choiceTouch);
 	setup(tM, s);
 
 	%==============================================GET SUBJECT NAME

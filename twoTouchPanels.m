@@ -13,24 +13,22 @@ aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
 stims			= {'stimFron', 'stimBack'};%, 'other', 'both'};
-trialN          = 10 ;
+trialN          = 5 ;
 choiceTouch     = [1 2];
 
 debug			= false;
 dummy			= false;
-timeOut			= 5;
+timeOut			= 10;
 nObjects		= length(stims);
 stimSize		= 20;
 circleRadius	= 12;
 degsPerStep		= 360 / nObjects;
 pxPerCm			= 16;
 distance		= 20;
-centerY			= 0;
+centerY			= 20;
 centerX			= 0;
 colourFron		= [0.8 0.5 0.3];
 colourBack		= [0.3 0.5 0.8];
-% colourBoth		= [0.8 0.3 0.5];
-% colourNone		= [0.8 0.5 0.8];
 randomise		= true;
 taskType        = 'coa';
 try
@@ -39,26 +37,19 @@ try
 		'pixelsPerCm', pxPerCm,'distance', distance,...
 		'screenXOffset', centerX,'screenYOffset', centerY);
 	open(s);
-	%==============================================CREATE STIMULI
-	stimX = barStimulus('size', stimSize, 'colour', colourFron,'speed',0);
-	stimFron = imageStimulus('size', stimSize, 'colour', colourFron,...
-		'fileName',[s.paths.root '/stimuli/star.png']);
-	stimBack = imageStimulus('size', stimSize, 'colour', colourBack,...
-		'fileName',[s.paths.root '/stimuli/triangle.png']);
-% 	both = imageStimulus('size', stimSize, 'colour', colourBoth,...
-% 		'fileName',[s.paths.root '/stimuli/heptagon.png']);
-% 	none = imageStimulus('size', stimSize, 'colour', colourNone,...
-% 		'fileName',[s.paths.root '/stimuli/circle.png']);
-	setup(stimFron, s);
-	setup(stimBack, s);
-% 	setup(both, s);
-% 	setup(none, s);
 
 	%==============================================INITIATE THE TOUCHPANELS
 	tMFron = touchManager('device',choiceTouch(1),'isDummy',dummy);
 	tMBack = touchManager('device',choiceTouch(2),'isDummy',dummy);
 	setup(tMFron, s);
     setup(tMBack, s);
+	
+	%==============================================CREATE STIMULI
+	stimFron= barStimulus('size', stimSize, 'colour', colourFron,'speed',0);
+	stimBack= barStimulus('size', stimSize, 'colour', colourBack,'speed',0);
+	setup(stimFron, s);
+	setup(stimBack, s);
+
 	%==============================================GET SUBJECT NAME
 	subject= input ("Enter subject name:",'s');
 	nameExp=[subject,'-',date,'.mat'];
@@ -71,15 +62,8 @@ try
 
 
 	correctTrials.Fron	= 0;
-	% 	correctTrialsFron.other	= 0;
-	% 	correctTrialsFron.both	= 0;
-	% 	correctTrialsFron.none	= 0;
-
 	correctTrials.Back	= 0;
 	correctTrials.Coop  = 0;
-	% 	correctTrialsBack.other	= 0;
-	% 	correctTrialsBack.both	= 0;
-	% 	correctTrialsBack.none	= 0;
 
 % 	reactionTimeFron.init	= GetSecs;
 % 	reactionTimeBack.init	= GetSecs;
@@ -89,13 +73,6 @@ try
 % 	reactionTimeFron.both	= zeros(trialN, 1);
 % 	reactionTimeFron.none	= zeros(trialN, 1);
 
-
-
-% 	reactionTimeBack.self	= zeros(trialN, 1);
-% 	reactionTimeBack.other	= zeros(trialN, 1);
-% 	reactionTimeBack.both	= zeros(trialN, 1);
-% 	reactionTimeBack.none	= zeros(trialN, 1);
-% 	
 	%==============================================START TOUCH QUEUE
 	try Priority(1); end
 	createQueue(tMFron,choiceTouch(1));
@@ -112,15 +89,15 @@ try
 		fprintf('\n===>>> Running Trial %i\n',iTrial);
 
 		% ----- set the positions for this trial
-		randOffset = round(rand * 360);
-		for jObj = 1 : nObjects
-			theta = deg2rad((degsPerStep * jObj) + randOffset);
-			[x,y] = pol2cart(theta, circleRadius);
-			eval([stims{jObj} '.xPositionOut = ' num2str(x) ';']);
-			eval([stims{jObj} '.yPositionOut = ' num2str(y) ';']);
-		end
-		stimFron.xPositionOut = 100;  stimFron.yPosition=30;
-		stimBack.xPositionOut = -100; stimBack.yPosition=30;
+% 		randOffset = round(rand * 360);
+% 		for jObj = 1 : nObjects
+% 			theta = deg2rad((degsPerStep * jObj) + randOffset);
+% 			[x,y] = pol2cart(theta, circleRadius);
+% 			eval([stims{jObj} '.xPositionOut = ' num2str(x) ';']);
+% 			eval([stims{jObj} '.yPositionOut = ' num2str(y) ';']);
+% 		end
+		stimFron.xPositionOut = -45;  stimFron.yPositionOut=25;
+		stimBack.xPositionOut =  45;  stimBack.yPositionOut=25;
 		% ----- randomise
 		if randomise
 			stimFron.colourOut		= [lim(rand) lim(rand) lim(rand)];
@@ -153,8 +130,8 @@ try
 			if debug; drawScreenCenter(s); drawGrid(s); drawText(s, txt); end %#ok<*UNRCH> 
 			vbl = flip(s);
 
-			[resultsFron, xFron, yFron] = checkTouchWindows(tMFron, cWins,choiceTouch(1));
-			[resultsBack, xBack, yBack] = checkTouchWindows(tMBack, cWins,choiceTouch(2));
+			[resultsFron, xFron, yFron] = checkTouchWindows(tMFron, cWins(1,:),choiceTouch(1));
+			[resultsBack, xBack, yBack] = checkTouchWindows(tMBack, cWins(2,:),choiceTouch(2));
 			if ~any([resultsFron resultsBack]); continue; end
 
 			switch taskType
@@ -274,7 +251,7 @@ try
 					end
 					
 			end
-			if debug && ~isempty(xFron)correctTrialsFron;; txt = sprintf('x = %.2f Y = %.2f',xFron(1),yFron(1)); end
+			if debug && ~isempty(xFron)correctTrialsFron; txt = sprintf('x = %.2f Y = %.2f',xFron(1),yFron(1)); end
 		end % END WHILE
 		
 		
