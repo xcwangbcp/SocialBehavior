@@ -53,8 +53,12 @@ try
 	setup(none, s);
 
 	%==============================================INITIATE THE TOUCHPANELS
-	tM = touchManager('device',choiceTouch,'isDummy',dummy);
-	setup(tM, s);
+    for i=1:length(choiceTouch)
+    	tM(i) = touchManager('device',choiceTouch(i),'isDummy',dummy);
+    	setup(tM(i), s);
+        createQueue(tM(i),choiceTouch(i));
+    	start(tM(i),choiceTouch(i));
+    end
 
 	%==============================================GET SUBJECT NAME
 	subject= input ("Enter subject name:",'s');
@@ -78,8 +82,7 @@ try
 	
 	%==============================================START TOUCH QUEUE
 	try Priority(1); end
-	createQueue(tM,choiceTouch);
-	start(tM,choiceTouch);
+
 	
 	%==============================================MAIN TRIAL LOOP
 	for iTrial=1:trialN
@@ -108,10 +111,14 @@ try
 		update(self); update(other); update(both); update(none);
  
 		% ====================================SHOW STIMULI
-		textMonkey		= 'no touch'; %%
+		textMonkey = 'no touch'; %%
 		selfReward = false; otherReward = false; bothReward = false; noneReward = false;
 		x = []; y = []; txt = ''; textMonkey = ''; anyTouch = false; cWins = [];
-		flush(tM,choiceTouch);
+
+        for j=1:length(choiceTouch)
+    		flush(tM(j),choiceTouch(j));
+        end
+
 		vbl = flip(s); tStart = vbl;
 		while vbl <= (tStart + timeOut) && anyTouch == false
 			for jObj = 1 : nObjects
@@ -122,7 +129,7 @@ try
 			end
 			if debug; drawScreenCenter(s); drawGrid(s); drawText(s, txt); end %#ok<*UNRCH> 
 			vbl = flip(s);
-
+            
 			[results, x, y] = checkTouchWindows(tM, cWins,choiceTouch);
 
 			if debug && ~isempty(x); txt = sprintf('x = %.2f Y = %.2f',x(1),y(1)); end
