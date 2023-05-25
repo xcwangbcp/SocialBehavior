@@ -2,7 +2,7 @@ function fixationRemapper(s)
 
 	if ~exist('s','var'); s = screenManager; end
 
-	f = fixationCrossStimulus('type','pulse','size',2);
+	f = fixationCrossStimulus('type','pulse','size',5);
 
 	if ~s.isOpen; open(s); didOpen = true; end
 	setup(f, s);
@@ -20,7 +20,7 @@ function fixationRemapper(s)
 	loop = true;
 	x = f.xPosition;
 	y = f.yPosition;
-	step = 1;
+	step = 10;
 
 	while loop
 		s.drawText(sprintf('MENU %.2gx %.2gy: esc = exit | Arrow Keys = move | / = change step | RShift = toggle',x,y));
