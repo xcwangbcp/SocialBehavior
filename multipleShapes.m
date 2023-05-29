@@ -56,11 +56,11 @@ try
 	%==============================================INITIATE THE TOUCHPANELS
 	tM = touchManager('device',choiceTouch);
 	setup(tM, s);
-    for i=1:length(choiceTouch)
-    	tM(i) = touchManager('device',choiceTouch(i),'isDummy',dummy);
-    	setup(tM(i), s);
-        createQueue(tM(i),choiceTouch(i));
-    	start(tM(i),choiceTouch(i));
+	for i=1:length(choiceTouch)
+		tM(i) = touchManager('device',choiceTouch(i),'isDummy',dummy);
+		setup(tM(i), s);
+		createQueue(tM(i),choiceTouch(i));
+		start(tM(i),choiceTouch(i));
 	end
 
 	%==============================================GET SUBJECT NAME
