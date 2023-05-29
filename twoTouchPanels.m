@@ -2,8 +2,8 @@
 
 function twoTouchPanels()
 
-a_front = arduinoManager('port','/dev/ttyACM1'); a_front.open;
-a_back  = arduinoManager('port','/dev/ttyACM0'); a_back.open;
+a_front = arduinoManager('port','/dev/ttyACM1','shield','new'); a_front.open;
+a_back  = arduinoManager('port','/dev/ttyACM0','shield','new'); a_back.open;
 
 %Audio Manager
 if ~exist('aM','var') || isempty(aM) || ~isa(aM,'audioManager')
