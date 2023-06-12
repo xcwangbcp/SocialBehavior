@@ -13,12 +13,12 @@ aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
 stims			= {'stimFron', 'stimBack'};%, 'other', 'both'};
-trialN          = 5 ;
+trialN          = 15 ;
 choiceTouch     = [1 2];
 
 debug			= false;
 dummy			= false;
-timeOut			= 10;
+timeOut			= 3;
 nObjects		= length(stims);
 stimSize		= 20;
 circleRadius	= 12;
@@ -100,8 +100,8 @@ try
 % 			eval([stims{jObj} '.xPositionOut = ' num2str(x) ';']);
 % 			eval([stims{jObj} '.yPositionOut = ' num2str(y) ';']);
 % 		end
-		stimFron.xPositionOut = -45;  stimFron.yPositionOut=25;
-		stimBack.xPositionOut =  45;  stimBack.yPositionOut=25;
+		stimFron.xPositionOut = -80;  stimFron.yPositionOut=25;
+		stimBack.xPositionOut = -120;  stimBack.yPositionOut=25;
 		% ----- randomise
 		if randomise
 			stimFron.colourOut		= [lim(rand) lim(rand) lim(rand)];
@@ -140,28 +140,28 @@ try
 
 			switch taskType
 				case {'competition','com'}
-					if any(resultsFron)
-						disp('front monkey win');
-						touchFron=true;
-						correctTrials.Fron        = correctTrials.Fron+1;
+					if any(resultsFron)&&~any(resultsBack)
+						touchFron                 = true;
 						reactionTime.Fron(iTrial) = GetSecs-tStart;
-					elseif any(resultsBack)
-						disp('back monkey win');
-						touchBack=true;
+						correctTrials.Fron        = correctTrials.Fron+1;
+						disp('front monkey win');
+					elseif any(resultsBack)&&~any(resultsFron)
+						touchBack                 = true;
 						correctTrials.Back        = correctTrials.Back+1;
 						reactionTime.Back(iTrial) = GetSecs-tStart;
+						disp('back monkey win');
 					end
 					if any(resultsFron)||any(resultsBack)
 						flip(s);
 % 						 break;
 					end
 				case{'cooperation','coo'}
-					if any(resultsFron)
-						touchFron=true;
+					if any(resultsFron)&&~any(resultsBack)
+						touchFron                 =  true;	
+						correctTrials.Fron        = correctTrials.Fron+1;
+						reactionTime.Fron(iTrial) = GetSecs-tStart;
 						disp('front monkey touch first');
-% 						correctTrials.Fron        = correctTrials.Fron+1;
-% 						reactionTime.Fron(iTrial) = GetSecs-tStart;
-						draw(stimBack);
+						draw(stimBack);flip(s);
 						tleft                     = timeOut-reactionTime.Fron(iTrial);
 						vbl2 = flip(s);   tStart2 = vbl2;
 						while ~any(resultsBack)&&vbl2<tStart2+tleft							
@@ -170,20 +170,22 @@ try
 							vbl2=flip(s);
 						end
 						if any(resultsBack)
-							touchBack=true;
-							correctTrials.Coop=correctTrials.Coop+1;
+							touchBack                 = true;
+							correctTrials.Back        = correctTrials.Back+1;
+							reactionTime.Back(iTrial) = GetSecs-tStart;
+							correctTrials.Coop        = correctTrials.Coop+1;
 							reactionTime.Coop(iTrial) = GetSecs-tStart;
 							disp('then the back monkey touch')
 							flip(s);
 							break
 						end
 					
-					elseif any(resultsBack)
-						touchBack = true;
+					elseif any(resultsBack)&&~any(resultsFron)
+						touchBack                 = true;				
+						correctTrials.Back        = correctTrials.Back+1;
+						reactionTime.Back(iTrial) = GetSecs-tStart;
 						disp('back monkey touch first')
-% 						correctTrials.Back        = correctTrials.Back+1;
-% 						reactionTime.Back(iTrial) = GetSecs-tStart;
-						draw(stimFron);
+						draw(stimFron);flip(s);
 						tleft                     = timeOut-reactionTime.Back(iTrial);
 						vbl2   =  flip(s); tStart2=vbl2;
 						while ~any(resultsFron)&&vbl2<tStart2+tleft
@@ -193,7 +195,9 @@ try
 						end
 					
 						if any(resultsFron)
-							touchFron=true;
+							touchFron                 = true;
+							correctTrials.Fron        = correctTrials.Fron+1;
+							reactionTime.Fron(iTrial) = GetSecs-tStart;
 							correctTrials.Coop        = correctTrials.Coop+1;
 							reactionTime.Coop(iTrial) = GetSecs-tStart;
 							disp('then the front monkey touch')
@@ -202,54 +206,59 @@ try
 						end
 					end
 				case{'co-action','coa'}
-                    if any(resultsFron)&&any(resultsBack)
-                        correctTrials.Fron       = correctTrials.Fron+1;
-                        correctTrials.Back       = correctTrials.Back+1;
-                        correctTrials.Coa        = correctTrials.Coa+1;
-                        reactionTime.Coa(iTrial) = GetSecs-tStart;
-                        aM.beep(2000,0.1,0.1);
-                        a_front.stepper(46);
-                        a_back.stepper(46);
-                    end
+					% if any(resultsFron)&&any(resultsBack)
+					% 	reactionTime.Coa(iTrial) = GetSecs-tStart;
+					% 	reactionTime.Fron(iTrial)= GetSecs-tStart;
+					% 	reactionTime.Back(iTrial)= GetSecs-tStart;
+					% 	correctTrials.Fron       = correctTrials.Fron+1;
+					% 	correctTrials.Back       = correctTrials.Back+1;
+					% 	correctTrials.Coa        = correctTrials.Coa+1;
+                    %     flip(s);
+					% 	aM.beep(2000,0.1,0.1);
+					% 	a_front.stepper(46);
+					% 	a_back.stepper(46);
+					% end
                     
-                    if  any(resultsFron)&&~any(resultsBack)
-                        touchFron=true;
-                        aM.beep(2000,0.1,0.1);
-                        a_front.stepper(46);
-                        disp('front monkey touch first');
-                        
-                        correctTrials.Fron        = correctTrials.Fron+1;
-                        reactionTime.Fron(iTrial) = GetSecs-tStart;
-%                         draw(stimBack);
-                        tleft                     = timeOut-reactionTime.Fron(iTrial);
-                        vbl2 = flip(s);   tStart2 = vbl2;
-                        while ~any(resultsBack)&&vbl2<tStart2+tleft
-                            resultsBack = checkTouchWindows(tMBack, cWins,choiceTouch(2));
-                            draw(stimBack);
-                            vbl2=flip(s);
-                        end
-                        if any(resultsBack)
-                            correctTrials.Back       = correctTrials.Back+1;
-                            correctTrials.Coa        = correctTrials.Coa+1;
-                            reactionTime.Coa(iTrial) = GetSecs-tStart;
-                            aM.beep(2000,0.1,0.1);
-                            a_back.stepper(46);
-                            disp('then the back monkey touch')
-                            flip(s);
-                            break;
-                        end
-                    end
+					if  any(resultsFron)&&~any(resultsBack)
+						touchFron                 = true;
+						reactionTime.Fron(iTrial) = GetSecs-tStart;
+						correctTrials.Fron        = correctTrials.Fron+1;
+						draw(stimBack);
+						flip(s);
+						aM.beep(2000,0.1,0.1);
+						a_front.stepper(46);
+						disp('front monkey touch first');
+						tleft                     = timeOut-reactionTime.Fron(iTrial);
+						vbl2 = flip(s);   tStart2 = vbl2;
+						while ~any(resultsBack)&&vbl2<tStart2+tleft
+							resultsBack = checkTouchWindows(tMBack, cWins,choiceTouch(2));
+							draw(stimBack);
+							vbl2=flip(s);
+						end
+						if any(resultsBack)
+							flip(s);
+							reactionTime.Back(iTrial)= GetSecs-tStart;
+							reactionTime.Coa(iTrial) = GetSecs-tStart;
+							correctTrials.Back       = correctTrials.Back+1;
+							correctTrials.Coa        = correctTrials.Coa+1;
+							aM.beep(2000,0.1,0.1);
+							a_back.stepper(46);
+							disp('then the back monkey touch')
+							break;
+						end
+					end
 
 					if any(resultsBack)&&~any(resultsFron)
-						touchBack = true;
+						touchBack                 = true;
+						reactionTime.Back(iTrial) = GetSecs-tStart;
+						correctTrials.Back        = correctTrials.Back+1;
+						draw(stimFron);
+						flip(s)
 						aM.beep(2000,0.1,0.1);
 						a_back.stepper(46);
 						disp('back monkey touch first')
-						correctTrials.Back        = correctTrials.Back+1;
-						reactionTime.Back(iTrial) = GetSecs-tStart;
-% 						draw(stimFron);
-						tleft                     = timeOut-reactionTime.Back(iTrial);
-						vbl2   =  flip(s); tStart2=vbl2;
+						tleft                      = timeOut-reactionTime.Back(iTrial);
+						vbl2   =  flip(s); tStart2 = vbl2;
 						while ~any(resultsFron)&&vbl2<tStart2+tleft
 							resultsFron = checkTouchWindows(tMFron, cWins,choiceTouch(1));
 							draw(stimFron);
@@ -257,13 +266,15 @@ try
 						end
 
 						if any(resultsFron)
-                            correctTrials.Fron       = correctTrials.Fron+1;
-							correctTrials.Coa        = correctTrials.Coa+1;
+							reactionTime.Fron(iTrial)= GetSecs-tStart;
 							reactionTime.Coa(iTrial) = GetSecs-tStart;
+							correctTrials.Fron       = correctTrials.Fron+1;
+							correctTrials.Coa        = correctTrials.Coa+1;
+							flip(s);
 							aM.beep(2000,0.1,0.1);
 							a_front.stepper(46);
 							disp('then the front monkey touch')
-							flip(s);
+
 							break
 						end
 					end
@@ -292,8 +303,8 @@ try
 					a_front.stepper(46);
 					a_back.stepper(46);
 				end
-				WaitSecs(1)
 		end
+		flip(s);
 		WaitSecs(2);
 
 	end
