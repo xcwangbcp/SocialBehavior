@@ -1,9 +1,12 @@
-
-
 function twoTouchPanels()
 
-a_front = arduinoManager('port','/dev/ttyACM1','shield','new'); a_front.open;
-a_back  = arduinoManager('port','/dev/ttyACM0','shield','new'); a_back.open;
+a_front = arduinoManager('port','/dev/ttyACM0','shield','new'); a_front.open;
+a_back  = arduinoManager('port','/dev/ttyACM1','shield','new'); a_back.open;
+
+eyeTrigger1 = dataConnection('protocol','udp','rPort',35000,'rAddress','10.10.47.122');
+open(eyeTrigger1);
+eyeTrigger2 = dataConnection('protocol','udp','rPort',35002,'rAddress','10.10.47.122');
+open(eyeTrigger2);
 
 %Audio Manager
 if ~exist('aM','var') || isempty(aM) || ~isa(aM,'audioManager')
@@ -13,9 +16,8 @@ aM.silentMode = false;
 if ~aM.isSetup;	aM.setup; end
 
 stims			= {'stimFron', 'stimBack'};%, 'other', 'both'};
-trialN          = 15 ;
+trialN          = 10;
 choiceTouch     = [1 2];
-
 debug			= false;
 dummy			= false;
 timeOut			= 3;
@@ -87,7 +89,10 @@ try
 	drawTextNow(s,text);
 	start(tMBack,choiceTouch(2));
 
-
+    eyeTrigger1.write(int32(10000));
+    eyeTrigger2.write(int32(10000));
+    eyeTrigger1.write(int32(10000));
+    eyeTrigger2.write(int32(10000));
 	%==============================================MAIN TRIAL LOOP
 	for iTrial=1:trialN
 		fprintf('\n===>>> Running Trial %i\n',iTrial);
@@ -100,8 +105,8 @@ try
 % 			eval([stims{jObj} '.xPositionOut = ' num2str(x) ';']);
 % 			eval([stims{jObj} '.yPositionOut = ' num2str(y) ';']);
 % 		end
-		stimFron.xPositionOut = -80;  stimFron.yPositionOut=25;
-		stimBack.xPositionOut = -120;  stimBack.yPositionOut=25;
+		stimFron.xPositionOut = -60;  stimFron.yPositionOut=25;
+		stimBack.xPositionOut = -90;  stimBack.yPositionOut=25;
 		% ----- randomise
 		if randomise
 			stimFron.colourOut		= [lim(rand) lim(rand) lim(rand)];
@@ -125,6 +130,8 @@ try
 		flush(tMBack,choiceTouch(2));
 
 		vbl = flip(s); tStart = vbl;
+
+		a = 0;
 		while vbl <= (tStart + timeOut) && touchFron == false && touchBack==false
 			for jObj = 1 : nObjects
 				% we use eval as our object names are stored in an array
@@ -133,6 +140,8 @@ try
 			end
 			if debug; drawScreenCenter(s); drawGrid(s); drawText(s, txt); end %#ok<*UNRCH> 
 			vbl = flip(s);
+			
+			if a == 0; eyeTrigger1.write(int32(iTrial)); eyeTrigger2.write(int32(iTrial)); a = 1; end
 
 			[resultsFron, xFron, yFron] = checkTouchWindows(tMFron, cWins(1,:),choiceTouch(1));
 			[resultsBack, xBack, yBack] = checkTouchWindows(tMBack, cWins(2,:),choiceTouch(2));
@@ -206,18 +215,18 @@ try
 						end
 					end
 				case{'co-action','coa'}
-					% if any(resultsFron)&&any(resultsBack)
-					% 	reactionTime.Coa(iTrial) = GetSecs-tStart;
-					% 	reactionTime.Fron(iTrial)= GetSecs-tStart;
-					% 	reactionTime.Back(iTrial)= GetSecs-tStart;
-					% 	correctTrials.Fron       = correctTrials.Fron+1;
-					% 	correctTrials.Back       = correctTrials.Back+1;
-					% 	correctTrials.Coa        = correctTrials.Coa+1;
-                    %     flip(s);
-					% 	aM.beep(2000,0.1,0.1);
-					% 	a_front.stepper(46);
-					% 	a_back.stepper(46);
-					% end
+					if any(resultsFron)&&any(resultsBack)
+						reactionTime.Coa(iTrial) = GetSecs-tStart;
+						reactionTime.Fron(iTrial)= GetSecs-tStart;
+						reactionTime.Back(iTrial)= GetSecs-tStart;
+						correctTrials.Fron       = correctTrials.Fron+1;
+						correctTrials.Back       = correctTrials.Back+1;
+						correctTrials.Coa        = correctTrials.Coa+1;
+                        flip(s);
+						aM.beep(2000,0.1,0.1);
+						a_front.stepper(46);
+						a_back.stepper(46);
+					end
                     
 					if  any(resultsFron)&&~any(resultsBack)
 						touchFron                 = true;
@@ -283,7 +292,8 @@ try
 			if debug && ~isempty(xFron)correctTrialsFron; txt = sprintf('x = %.2f Y = %.2f',xFron(1),yFron(1)); end
 		end % END WHILE
 		
-		
+		eyeTrigger1.write(int32(0));
+        eyeTrigger2.write(int32(0));			
 		
 		% =============================REWARDS
 		if debug; drawTextNow(s,textMonkey); end
@@ -312,6 +322,10 @@ try
 
 % 	reactionTimeFron.end   = GetSecs;
 % 	reactionTimeFron.total = reactionTimeFron.end - reactionTimeFron.init;
+
+	% say we finish experiment
+	eyeTrigger1.write(int32(-500));
+	eyeTrigger2.write(int32(-500));
 
 % 	a_front.close;a_back.close;
 
